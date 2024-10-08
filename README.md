@@ -2,9 +2,9 @@
 
 - [socket()](https://linux.die.net/man/2/socket)
 - [close()](https://linux.die.net/man/2/close)
-- setsockopt()
-- getsockname()
-- getprotobyname()
+- [setsockopt()](https://linux.die.net/man/3/setsockopt)
+- [getsockname()](https://linux.die.net/man/3/getsockname)
+- [getprotobyname()](https://linux.die.net/man/3/getprotobyname)
 - gethostbyname()
 - getaddrinfo()
 - freeaddrinfo()
