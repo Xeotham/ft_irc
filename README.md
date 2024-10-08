@@ -1,7 +1,7 @@
 # Ft_irc from 42 school
 
-- socket()
-- close()
+- [socket()](https://linux.die.net/man/2/socket)
+- [close()](https://linux.die.net/man/2/close)
 - setsockopt()
 - getsockname()
 - getprotobyname()
