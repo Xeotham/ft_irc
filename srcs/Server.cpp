@@ -2,7 +2,7 @@
 
 bool Server::_signal = false;
 
-Server::Server(int port, std::string password)
+Server::Server(const int port, const std::string &password)
 {
 	_port = port;
 	_serverSocketFd = -1;

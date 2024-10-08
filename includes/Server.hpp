@@ -17,13 +17,15 @@
 class Server
 {
 	private:
-		int							_Port;
+		int							_port;
 		int							_serverSocketFd;
+		std::string					_password;
 		std::vector<Client> 		_clients;
 		std::vector<struct pollfd>	_fds;
 		static bool					_signal;
 	public:
 		Server();
+		Server(const int port, const std::string &password);
 		~Server();
 		
 		void		serverSocket();
