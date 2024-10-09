@@ -23,6 +23,6 @@
 - [signal()](https://linux.die.net/man/2/signal)
 - [sigaction()](https://linux.die.net/man/2/sigaction)
 - [lseek()](https://linux.die.net/man/2/lseek)
-- fstat()
-- fcntl()
-- poll() or equivalent
+- [fstat()](https://linux.die.net/man/2/fstat)
+- [fcntl()](https://linux.die.net/man/2/fcntl)
+- [poll() or equivalent](https://linux.die.net/man/2/poll)
