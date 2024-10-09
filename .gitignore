@@ -1,1 +1,10 @@
-.vscode
+*obj/
+*.o
+*.a
+*.out
+*.vscode/
+*test/
+*.idea
+*.csv
+*.txt
+.gitignore

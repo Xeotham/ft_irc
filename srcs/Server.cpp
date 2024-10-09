@@ -16,10 +16,7 @@ Server::Server(const Server &ref)
 
 Server& Server::operator=(const Server &rhs)
 {
-	if (this != &rhs)
-	{
-		_port = 
-	}
+	(void)rhs;
 	return *this;
 }
 
@@ -39,12 +36,47 @@ void		Server::acceptNewClient()
 	Client cl;
 	struct sockaddr_in	clientAdress;
 	struct pollfd		newPoll;
+	socklen_t			len = sizeof(clientAdress);
 
+	int	clientSocketFd = accept(_serverSocketFd,(sockaddr *)&clientAdress, &len);
+	if (clientSocketFd == -1)
+		throw (std::runtime_error("Error : cannot accept client."));
+	if (fcntl(this->_serverSocketFd, F_SETFL, O_NONBLOCK) == -1)
+		throw (std::runtime_error("Error : cannot setup option (O_NONBLOCK)."));
+
+	newPoll.fd = clientSocketFd;
+	newPoll.events = POLLIN;
+	newPoll.revents = 0;
+
+	cl.setFd(clientSocketFd);
+	cl.setIpAdd(inet_ntoa(clientAdress.sin_addr));
+	_clients.push_back(cl);
+	_fds.push_back(newPoll);
+}
+
+void	Server::receiveNewData(int fd)
+{
+	char	buffer[1024];
+	
+	std::memset(buffer, 0,sizeof(buffer));
+
+	int data = recv(fd, buffer, sizeof(buffer) - 1, 0);
+	if (data <= 0)
+	{
+		std::cout << "Client " << fd << " disconnected." << std::endl;
+		clearClients(fd);
+		close(fd);
+	}
+	else
+	{
+		buffer[data] = '\0';
+		std::cout << "Client " << fd << " > data : " << buffer << std::endl;
+	}
 }
 
 void	Server::closeFds()
 {
-	for (std::vector<Client>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		std::cout << "Client <" << it->getFd() << "> disconnected." << std::endl;
 		close(it->getFd());
@@ -58,19 +90,19 @@ void	Server::closeFds()
 
 void	Server::clearClients(int fd)
 {
-	for (std::vector<struct pollfd>::iterator it = this->_fds.begin(); it != this->_fds.end(); it++)
+	for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++)
 	{
 		if (it->fd == fd)
 		{
-			this->_fds.erase(it);
+			_fds.erase(it);
 			break;
 		}
 	}
-	for (std::vector<Client>::iterator it = this->_clients.begin(); it != this->_clients.end(); it++)
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		if (it->getFd() == fd)
 		{
-			this->_clients.erase(it);
+			_clients.erase(it);
 			break;
 		}
 	}
@@ -82,11 +114,11 @@ void	Server::serverSocket()
 	struct pollfd		newPoll;
 
 	serverAdress.sin_family = AF_INET;
-	serverAdress.sin_port = htons(this->_port);
+	serverAdress.sin_port = htons(_port);
 	serverAdress.sin_addr.s_addr = INADDR_ANY;
 
-	this->_serverSocketFd = socket(AF_INET, SOCK_STREAM, 0);
-	if (this->_serverSocketFd == -1)
+	_serverSocketFd = socket(AF_INET, SOCK_STREAM, 0);
+	if (_serverSocketFd == -1)
 		throw (std::runtime_error("Error : socket creation."));
 	
 	int	opt = 1;
@@ -102,7 +134,7 @@ void	Server::serverSocket()
 	newPoll.fd = _serverSocketFd;
 	newPoll.events = POLLIN;
 	newPoll.revents = 0;
-	this->_fds.push_back(newPoll);
+	_fds.push_back(newPoll);
 }
 
 void	Server::serverInit()
