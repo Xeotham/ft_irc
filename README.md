@@ -22,7 +22,7 @@
 - [recv()](https://linux.die.net/man/3/recv)
 - [signal()](https://linux.die.net/man/2/signal)
 - [sigaction()](https://linux.die.net/man/2/sigaction)
-- lseek()
+- [lseek()](https://linux.die.net/man/2/lseek)
 - fstat()
 - fcntl()
 - poll() or equivalent
