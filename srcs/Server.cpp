@@ -168,6 +168,20 @@ void	Server::serverInit()
 	closeFds();
 }
 
+void	Server::addChannel(const std::string &name)
+{
+	try {
+		for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		{
+			if (it->getName() == name)
+				throw (std::invalid_argument("Channel already exists."));
+		}
+		Channel ch(name);
+		_channels.push_back(ch);
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+	}
+}
 
 // void	Server::serverInit()
 // {

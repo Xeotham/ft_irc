@@ -14,7 +14,7 @@
 # include <limits>
 # include <cstring>
 # include <cstdlib>
-
+#include "Channel.hpp"
 # include "Client.hpp"
 
 class Server
@@ -24,6 +24,7 @@ class Server
 		int							_serverSocketFd;
 		std::vector<Client> 		_clients;
 		std::vector<struct pollfd>	_fds;
+		std::vector<Channel>		_channels;
 		static bool					_signal;
 		std::string					_password;
 
@@ -36,6 +37,8 @@ class Server
 		void		joinCommand();
 
 		void		clearClients(int fd);
+
+		void		addChannel(const std::string &name);
 	public:
 		Server(const int port, const std::string &password);
 		Server(const Server &ref);
