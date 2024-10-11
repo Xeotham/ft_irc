@@ -1,6 +1,5 @@
 #include <Channel.hpp>
 #include <algorithm>
-#include <Client.hpp>
 
 Channel::Channel() {
 	this->_name = "";
@@ -36,31 +35,19 @@ void Channel::setName(const std::string& name) {
 }
 
 // Other member functions
-void Channel::addUser(Client& user) {
-	for (std::vector<Client *>::iterator it = this->_users.begin(); it != this->_users.end(); it++)
-		if (*it == &user)
-			throw (std::invalid_argument("Client already exists."));
-	this->_users.push_back(&user);
+void Channel::addUser(const Client& user) {
+	if (std::find(this->_users.begin(), this->_users.end(), user) == this->_users.end())
+		throw (std::invalid_argument("Client already exists."));
+	this->_users.push_back(user);
 }
 
 void Channel::removeUser(const Client& user) {
 
-	std::vector<Client *>::iterator it;
-	for (it = this->_users.begin(); it != this->_users.end(); it++)
-		if (*it == &user)
-			break;
+	std::vector<Client>::iterator it = std::find(this->_users.begin(), this->_users.end(), user);
 	if (it != this->_users.end())
 		this->_users.erase(it);
 }
 
-const std::vector<Client*>	&Channel::getUsers() const {
+const std::vector<Client>& Channel::getUsers() const {
 	return (this->_users);
 }
-
-// std::vector<Channel>::const_iterator	&Channel::getChannelByName(std::vector<Channel> lst, const std::string &name)
-// {
-// 	for (std::vector<Channel>::iterator it = lst.begin(); it != lst.end(); it++)
-// 		if (it->getName() == name)
-// 			return (it);
-// 	return (lst.end());
-// }

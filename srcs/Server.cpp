@@ -2,7 +2,7 @@
 
 bool Server::_signal = false;
 
-Server::Server(int port, const std::string &password)
+Server::Server(const int port, const std::string &password)
 {
 	_port = port;
 	_serverSocketFd = -1;
@@ -11,8 +11,6 @@ Server::Server(int port, const std::string &password)
 
 Server::Server(const Server &ref)
 {
-	this->_port = 0;
-	this->_serverSocketFd = 0;
 	*this = ref;
 }
 
@@ -111,73 +109,10 @@ void	Server::setNickCommand(int fd, std::string data)
 	return ;
 }
 
-void	Server::privmsgCommand(int fd, std::string data)
-{
-	std::string message;
-	data.erase(0, 8);
-	size_t pos = data.find(" ");
-	std::string dest = data.substr(0, pos);
-	std::cout << "dest : " << dest << std::endl;
-	if (dest.find_first_of("#") != std::string::npos)
-	{
-		// std::string channel = dest;
-		std::string message = "Error : channel not supported.\r\n";
-		send(fd, message.c_str(), message.size(), 0);
-		return ;
-	}
-	else
-	{
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		{
-			if (it->getFd() == fd)
-			{
-				message = it->getNick() + " " + data.substr(pos + 1);
-				break;
-			}
-		}
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		{
-			if (it->getNick() == dest)
-			{
-				send(it->getFd(), message.c_str(), message.size(), 0);
-				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << message << std::endl;
-				return ;
-			}
-		}
-		std::string message = "Error : user not found.\r\n";
-		send(fd, message.c_str(), message.size(), 0);
-		return ;
-	}
-}
-
-void	Server::checkData(int fd, std::string data)
-{
-	if (data.find("PASS") != std::string::npos)
-		if (passCheck(fd, data) == false)
-			return ;
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getFd() == fd && it->getPassword() == 0)
-		{
-			std::string message = "Error : wrong password.\r\n";
-			send(fd, message.c_str(), message.size(), 0);
-			std::cout << "Client <" << it->getFd() << "> disconnected." << std::endl;
-			close(fd);
-			clearClients(fd);
-			return ;
-		}
+		std::cout << "Client <" << it->getFd() << ">." << std::endl;
 	}
-	if (data.find("JOIN") != std::string::npos)
-		return ;
-	if (data.find("PRIVMSG") != std::string::npos)
-		privmsgCommand(fd, data);
-	if (data.find("QUIT") != std::string::npos)
-		return ;
-	if (data.find("NICK") != std::string::npos)
-		setNickCommand(fd, data);
-	if (data.find("USER") != std::string::npos)
-		setUserCommand(fd, data);
-
 }
 
 void	Server::receiveNewData(int fd)
