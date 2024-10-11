@@ -15,7 +15,7 @@
 # include <cstring>
 # include <cstdlib>
 #include "Channel.hpp"
-#include "Client.hpp"
+# include "Client.hpp"
 
 class Server
 {
@@ -43,9 +43,8 @@ class Server
 		void		clearClients(int fd);
 
 		void		addChannel(const std::string &name);
-
 	public:
-		Server(int port, const std::string &password);
+		Server(const int port, const std::string &password);
 		Server(const Server &ref);
 		Server& operator=(const Server &rhs);
 		~Server();
