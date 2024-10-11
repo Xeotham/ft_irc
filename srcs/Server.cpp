@@ -175,7 +175,7 @@ void	Server::checkData(int fd, std::string data)
 		setNickCommand(fd, data);
 	if (data.find("USER") != std::string::npos)
 		setUserCommand(fd, data);
-	
+
 }
 
 void	Server::receiveNewData(int fd)
@@ -245,6 +245,7 @@ void	Server::serverSocket()
 	_serverSocketFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverSocketFd == -1)
 		throw (std::runtime_error("Error : socket creation."));
+	
 	int	opt = 1;
 	if (setsockopt(_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		throw (std::runtime_error("Error : cannot setup socket option (SO_REUSEADDR)."));
@@ -267,8 +268,10 @@ void	Server::serverInit()
 	serverSocket();
 	while (Server::_signal == false)
 	{
+		std::cout << "size " << _fds.size() << std::endl;
 		if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
 			throw (std::runtime_error("Error : poll() failed."));
+		std::cout << "Polling..." << std::endl;
 		for (size_t i = 0; i < _fds.size(); i++)
 		{
 			if (_fds[i].revents & POLLIN)
@@ -282,3 +285,39 @@ void	Server::serverInit()
 	}
 	closeFds();
 }
+
+void	Server::addChannel(const std::string &name)
+{
+	try {
+		for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		{
+			if (it->getName() == name)
+				throw (std::invalid_argument("Channel already exists."));
+		}
+		Channel ch(name);
+		_channels.push_back(ch);
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+	}
+}
+
+// void	Server::serverInit()
+// {
+// 	serverSocket();
+// 	while (Server::_signal == false)
+// 	{
+// 		for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++)
+// 		{
+// 			if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
+// 				throw (std::runtime_error("Error : poll() failed."));
+// 			if (it->revents & POLLIN)
+// 			{
+// 				if (it->fd == _serverSocketFd)
+// 					acceptNewClient();
+// 				else
+// 					receiveNewData(it->fd);
+// 			}
+// 		}
+// 	}
+// 	closeFds();
+// }
