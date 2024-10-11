@@ -52,6 +52,13 @@ void		Server::acceptNewClient()
 	cl.setIpAdd(inet_ntoa(clientAdress.sin_addr));
 	_clients.push_back(cl);
 	_fds.push_back(newPoll);
+
+	std::cout << "New client <" << clientSocketFd << "> connected." << std::endl;
+
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		std::cout << "Client <" << it->getFd() << ">." << std::endl;
+	}
 }
 
 void	Server::receiveNewData(int fd)
@@ -137,23 +144,48 @@ void	Server::serverSocket()
 	_fds.push_back(newPoll);
 }
 
+
 void	Server::serverInit()
 {
 	serverSocket();
 	while (Server::_signal == false)
 	{
-		for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++)
+		std::cout << "size " << _fds.size() << std::endl;
+		if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
+			throw (std::runtime_error("Error : poll() failed."));
+		std::cout << "Polling..." << std::endl;
+		for (size_t i = 0; i < _fds.size(); i++)
 		{
-			if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
-				throw (std::runtime_error("Error : poll() failed."));
-			if (it->revents & POLLIN)
+			if (_fds[i].revents & POLLIN)
 			{
-				if (it->fd == _serverSocketFd)
+				if (_fds[i].fd == _serverSocketFd)
 					acceptNewClient();
 				else
-					receiveNewData(it->fd);
+					receiveNewData(_fds[i].fd);
 			}
 		}
 	}
 	closeFds();
 }
+
+
+// void	Server::serverInit()
+// {
+// 	serverSocket();
+// 	while (Server::_signal == false)
+// 	{
+// 		for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++)
+// 		{
+// 			if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
+// 				throw (std::runtime_error("Error : poll() failed."));
+// 			if (it->revents & POLLIN)
+// 			{
+// 				if (it->fd == _serverSocketFd)
+// 					acceptNewClient();
+// 				else
+// 					receiveNewData(it->fd);
+// 			}
+// 		}
+// 	}
+// 	closeFds();
+// }
