@@ -41,7 +41,7 @@ void		Server::acceptNewClient()
 	int	clientSocketFd = accept(_serverSocketFd,(sockaddr *)&clientAdress, &len);
 	if (clientSocketFd == -1)
 		throw (std::runtime_error("Error : cannot accept client."));
-	if (fcntl(this->_serverSocketFd, F_SETFL, O_NONBLOCK) == -1)
+	if (fcntl(clientSocketFd, F_SETFL, O_NONBLOCK) == -1)
 		throw (std::runtime_error("Error : cannot setup option (O_NONBLOCK)."));
 
 	newPoll.fd = clientSocketFd;
@@ -122,7 +122,7 @@ void	Server::serverSocket()
 		throw (std::runtime_error("Error : socket creation."));
 	
 	int	opt = 1;
-	if (setsockopt(_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt) == -1))
+	if (setsockopt(_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		throw (std::runtime_error("Error : cannot setup socket option (SO_REUSEADDR)."));
 	if (fcntl(_serverSocketFd, F_SETFL, O_NONBLOCK) == -1)
 		throw (std::runtime_error("Error : cannot setup option (O_NONBLOCK)."));
@@ -140,4 +140,20 @@ void	Server::serverSocket()
 void	Server::serverInit()
 {
 	serverSocket();
+	while (Server::_signal == false)
+	{
+		for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++)
+		{
+			if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
+				throw (std::runtime_error("Error : poll() failed."));
+			if (it->revents & POLLIN)
+			{
+				if (it->fd == _serverSocketFd)
+					acceptNewClient();
+				else
+					receiveNewData(it->fd);
+			}
+		}
+	}
+	closeFds();
 }
