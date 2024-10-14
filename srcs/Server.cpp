@@ -2,7 +2,7 @@
 
 bool Server::_signal = false;
 
-Server::Server(int port, const std::string &password)
+Server::Server(const int port, const std::string &password)
 {
 	_port = port;
 	_serverSocketFd = -1;
@@ -11,8 +11,6 @@ Server::Server(int port, const std::string &password)
 
 Server::Server(const Server &ref)
 {
-	this->_port = 0;
-	this->_serverSocketFd = 0;
 	*this = ref;
 }
 
@@ -111,16 +109,79 @@ void	Server::setNickCommand(int fd, std::string data)
 	return ;
 }
 
+void	Server::privmsgCommand(int fd, std::string data)
+{
+	std::string message;
+	data.erase(0, 8);
+	size_t pos = data.find(" ");
+	std::string dest = data.substr(0, pos);
+	std::cout << "dest : " << dest << std::endl;
+	if (dest.find_first_of("#") != std::string::npos)
+	{
+		// std::string channel = dest;
+		std::string message = "Error : channel not supported.\r\n";
+		send(fd, message.c_str(), message.size(), 0);
+		return ;
+	}
+	else
+	{
+		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		{
+			if (it->getFd() == fd)
+			{
+				message = it->getNick() + " " + data.substr(pos + 1);
+				break;
+			}
+		}
+		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+		{
+			if (it->getNick() == dest)
+			{
+				send(it->getFd(), message.c_str(), message.size(), 0);
+				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << message << std::endl;
+				return ;
+			}
+		}
+		std::string message = "Error : user not found.\r\n";
+		send(fd, message.c_str(), message.size(), 0);
+		return ;
+	}
+}
+
+void	Server::checkData(int fd, std::string data)
+{
+	if (data.find("PASS") != std::string::npos)
+		if (passCheck(fd, data) == false)
+			return ;
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		std::cout << "Client <" << it->getFd() << ">." << std::endl;
+		if (it->getFd() == fd && it->getPassword() == 0)
+		{
+			std::string message = "Error : wrong password.\r\n";
+			send(fd, message.c_str(), message.size(), 0);
+			std::cout << "Client <" << it->getFd() << "> disconnected." << std::endl;
+			close(fd);
+			clearClients(fd);
+			return ;
+		}
 	}
+	if (data.find("JOIN") != std::string::npos)
+		return ;
+	if (data.find("PRIVMSG") != std::string::npos)
+		privmsgCommand(fd, data);
+	if (data.find("QUIT") != std::string::npos)
+		return ;
+	if (data.find("NICK") != std::string::npos)
+		setNickCommand(fd, data);
+	if (data.find("USER") != std::string::npos)
+		setUserCommand(fd, data);
+
 }
 
 void	Server::receiveNewData(int fd)
 {
 	char	buffer[1024];
-	
+
 	std::memset(buffer, 0,sizeof(buffer));
 
 	int data = recv(fd, buffer, sizeof(buffer) - 1, 0);
@@ -184,7 +245,6 @@ void	Server::serverSocket()
 	_serverSocketFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverSocketFd == -1)
 		throw (std::runtime_error("Error : socket creation."));
-	
 	int	opt = 1;
 	if (setsockopt(_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		throw (std::runtime_error("Error : cannot setup socket option (SO_REUSEADDR)."));
@@ -207,10 +267,8 @@ void	Server::serverInit()
 	serverSocket();
 	while (Server::_signal == false)
 	{
-		std::cout << "size " << _fds.size() << std::endl;
 		if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
 			throw (std::runtime_error("Error : poll() failed."));
-		std::cout << "Polling..." << std::endl;
 		for (size_t i = 0; i < _fds.size(); i++)
 		{
 			if (_fds[i].revents & POLLIN)
@@ -224,39 +282,3 @@ void	Server::serverInit()
 	}
 	closeFds();
 }
-
-void	Server::addChannel(const std::string &name)
-{
-	try {
-		for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++)
-		{
-			if (it->getName() == name)
-				throw (std::invalid_argument("Channel already exists."));
-		}
-		Channel ch(name);
-		_channels.push_back(ch);
-	} catch (std::exception &e) {
-		std::cerr << e.what() << std::endl;
-	}
-}
-
-// void	Server::serverInit()
-// {
-// 	serverSocket();
-// 	while (Server::_signal == false)
-// 	{
-// 		for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++)
-// 		{
-// 			if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
-// 				throw (std::runtime_error("Error : poll() failed."));
-// 			if (it->revents & POLLIN)
-// 			{
-// 				if (it->fd == _serverSocketFd)
-// 					acceptNewClient();
-// 				else
-// 					receiveNewData(it->fd);
-// 			}
-// 		}
-// 	}
-// 	closeFds();
-// }
