@@ -29,12 +29,16 @@ class Server
 		std::string					_password;
 
 		void		serverSocket();
-		void		signalHandler(int signum);
 
 		void		acceptNewClient();
 		void		receiveNewData(int fd);
+		void		checkData(int fd, std::string data);
 
+		void		privmsgCommand(int fd, std::string data);
+		void		setNickCommand(int fd, std::string data);
+		void		setUserCommand(int fd, std::string data);
 		void		joinCommand();
+		bool		passCheck(int fd, std::string data);
 
 		void		clearClients(int fd);
 
@@ -48,6 +52,7 @@ class Server
 		
 		void	serverInit();
 		void	closeFds();
+		static void		signalHandler(int signum);
 };
 
 
