@@ -37,7 +37,7 @@ class Server
 		void		privmsgCommand(int fd, std::string data);
 		void		setNickCommand(int fd, std::string data);
 		void		setUserCommand(int fd, std::string data);
-		void		joinCommand();
+		void		joinCommand(int fd, std::string data);
 		bool		passCheck(int fd, std::string data);
 
 		void		clearClients(int fd);
@@ -50,8 +50,8 @@ class Server
 		Server& operator=(const Server &rhs);
 		~Server();
 		
-		void	serverInit();
-		void	closeFds();
+		void			serverInit();
+		void			closeFds();
 		static void		signalHandler(int signum);
 };
 

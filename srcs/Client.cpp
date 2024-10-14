@@ -3,6 +3,29 @@
 
 Client::Client()
 {
+	this->_fd = -1;
+	this->_ipAdd = "";
+	this->_nick = "";
+	this->_user = "";
+	this->_password = false;
+}
+
+Client::Client(const Client &ref)
+{
+	*this = ref;
+}
+
+Client	&Client::operator=(const Client &ref)
+{
+	if (this == &ref)
+		return *this;
+	this->_fd = ref._fd;
+	this->_ipAdd = ref._ipAdd;
+	// this->_current_channel = ref._current_channel;
+	this->_nick = ref._nick;
+	this->_user = ref._user;
+	this->_password = ref._password;
+	return *this;
 }
 
 Client::~Client()
@@ -19,16 +42,16 @@ void	Client::setIpAdd(std::string ip)
 	this->_ipAdd = ip;
 }
 
-void Client::setChannel(Channel &new_channel) {
-	if (this->getChannel() != &new_channel)
-		this->_current_channel = &new_channel;
-	else
-		throw (std::invalid_argument("User is already in the channel."));
-}
+// void Client::setChannel(Channel &new_channel) {
+// 	if (this->getChannel() != &new_channel)
+// 		this->_current_channel = &new_channel;
+// 	else
+// 		throw (std::invalid_argument("User is already in the channel."));
+// }
 
-Channel *Client::getChannel() const {
-	return (this->_current_channel);
-}
+// Channel *Client::getChannel() const {
+// 	return (this->_current_channel);
+// }
 
 int		Client::getFd() const
 {
@@ -47,7 +70,7 @@ void	Client::setUser(std::string user)
 
 void	Client::setPassword()
 {
-	this->_password = 1;
+	this->_password = true;
 }
 
 std::string	Client::getIpAdd() const
@@ -65,8 +88,17 @@ std::string	Client::getUser() const
 	return this->_user;
 }
 
-int	Client::getPassword() const
+bool	Client::getPassword() const
 {
 	return this->_password;
 }
 
+Client	&Client::getClientByFd(std::vector<Client> &lst, int fd)
+{
+	for (std::vector<Client>::iterator it = lst.begin(); it != lst.end(); it++) {
+		if (it->getFd() == fd) {
+			return (*it);
+		}
+	}
+	throw (std::invalid_argument("Client not found."));
+}

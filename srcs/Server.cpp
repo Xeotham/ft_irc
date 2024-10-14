@@ -113,26 +113,24 @@ void	Server::privmsgCommand(int fd, std::string data)
 {
 	std::string message;
 	data.erase(0, 8);
-	size_t pos = data.find(" ");
+	size_t pos = data.find(' ');
 	std::string dest = data.substr(0, pos);
 	std::cout << "dest : " << dest << std::endl;
-	if (dest.find_first_of("#") != std::string::npos)
+	if (dest.find_first_of('#') != std::string::npos)
 	{
+		Channel &chan = Channel::getChannelByName(this->_channels, dest);
+		for (std::vector<Client>::iterator it = chan.getUsers().begin(); it != chan.getUsers().end() ; it++ ) {
+			std::cout << it->getNick() << std::endl;
+			send(it->getFd(), message.c_str(), message.size(), 0);
+		}
+
 		// std::string channel = dest;
-		std::string message = "Error : channel not supported.\r\n";
-		send(fd, message.c_str(), message.size(), 0);
-		return ;
+		// std::string message = "Error : channel not supported.\r\n";
 	}
 	else
 	{
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		{
-			if (it->getFd() == fd)
-			{
-				message = it->getNick() + " " + data.substr(pos + 1);
-				break;
-			}
-		}
+		Client &value = Client::getClientByFd(this->_clients, fd);
+		message = value.getNick() + " " + data.substr(pos + 1);
 		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 		{
 			if (it->getNick() == dest)
@@ -144,8 +142,33 @@ void	Server::privmsgCommand(int fd, std::string data)
 		}
 		std::string message = "Error : user not found.\r\n";
 		send(fd, message.c_str(), message.size(), 0);
-		return ;
 	}
+}
+
+void Server::joinCommand(int fd, std::string data) {
+	data.erase(0, 5);
+	data.erase(data.end() - 2, data.end());
+	Client	&user = Client::getClientByFd(this->_clients, fd);
+	std::cout << user.getNick() << " try to join" << std::endl;
+	try {
+		Channel &chan = Channel::getChannelByName(this->_channels, data);
+		chan.addUser(user);
+		std::cout << "Channel already exist" << std::endl;
+	}
+	catch (std::exception &exc) {
+		try {
+			Channel	chan(data);
+			this->_channels.push_back(chan);
+		}
+		catch (std::exception &e) {
+			std::string	msg = e.what();
+			msg += "\r\n";
+			send(fd, msg.c_str(), msg.size(), 0);
+			return ;
+		}
+	}
+	std::string msg = ":" + user.getNick() + "!" + user.getUser() + "@localhost JOIN :" + data + "\r\n";
+	send(fd, msg.c_str(), msg.size(), 0);
 }
 
 void	Server::checkData(int fd, std::string data)
@@ -155,7 +178,7 @@ void	Server::checkData(int fd, std::string data)
 			return ;
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
-		if (it->getFd() == fd && it->getPassword() == 0)
+		if (it->getFd() == fd && it->getPassword() == false)
 		{
 			std::string message = "Error : wrong password.\r\n";
 			send(fd, message.c_str(), message.size(), 0);
@@ -165,17 +188,16 @@ void	Server::checkData(int fd, std::string data)
 			return ;
 		}
 	}
-	if (data.find("JOIN") != std::string::npos)
-		return ;
 	if (data.find("PRIVMSG") != std::string::npos)
 		privmsgCommand(fd, data);
-	if (data.find("QUIT") != std::string::npos)
+	else if (data.find("QUIT") != std::string::npos)
 		return ;
-	if (data.find("NICK") != std::string::npos)
+	else if (data.find("NICK") != std::string::npos)
 		setNickCommand(fd, data);
-	if (data.find("USER") != std::string::npos)
+	else if (data.find("USER") != std::string::npos)
 		setUserCommand(fd, data);
-
+	else if (data.find("JOIN") != std::string::npos)
+		joinCommand(fd, data);
 }
 
 void	Server::receiveNewData(int fd)
@@ -195,8 +217,8 @@ void	Server::receiveNewData(int fd)
 	{
 		buffer[data] = '\0';
 		std::cout << "Client " << fd << " > data : " << buffer << std::endl;
+		Server::checkData(fd, buffer);
 	}
-	Server::checkData(fd, buffer);
 }
 
 void	Server::closeFds()
