@@ -158,6 +158,7 @@ void Server::joinCommand(int fd, std::string data) {
 	catch (std::exception &exc) {
 		try {
 			Channel	chan(data);
+			chan.addUser(user);
 			this->_channels.push_back(chan);
 		}
 		catch (std::exception &e) {
