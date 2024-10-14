@@ -16,18 +16,18 @@ class Channel {
     public:
 		Channel& operator=(const Channel& other);
 	public:
-		void						setName(const std::string& name);
-		void						addUser(Client& user);
-		void						removeUser(const Client& user);
-		const std::vector<Client *>	&getUsers() const;
-		const std::string			&getName() const;
+		void					setName(const std::string& name);
+		void					addUser(Client& user);
+		void					removeUser(const Client& user);
+		std::vector<Client>		&getUsers();
+		const std::string		&getName() const;
 	public:
-		// static std::vector<Channel>::const_iterator	&getChannelByName(std::vector<Channel> lst, const std::string &name);
+		static Channel	&getChannelByName(std::vector<Channel> &lst, const std::string &name);
 	private:
 		Channel();
 	private:
 		std::string			_name;
-		std::vector<Client *> _users;
+		std::vector<Client> _users;
 };
 
 #endif // CHANNEL_HPP
