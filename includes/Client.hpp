@@ -5,30 +5,30 @@
 
 class Client
 {
-	private:
+	protected:
 		int			_fd;
 		std::string	_ipAdd;
 		std::string	_nick;
 		std::string	_user;
-		int			 _password;
+		std::string	_buffer;
+		bool		_password;
 	public:
 		Client();
-		~Client();
+		virtual ~Client();
 
 		void	setFd(int fd);
 		void	setIpAdd(std::string add);
 		void	setNick(std::string nick);
 		void	setUser(std::string user);
 		void	setPassword();
+		void	setBuffer(std::string buffer);
 
-		int		getFd() const;
+		int			getFd() const;
 		std::string	getIpAdd() const;
 		std::string	getNick() const;
 		std::string	getUser() const;
-		int			getPassword() const;
+		bool		getPassword() const;
+		std::string	getBuffer() const;
 };
-
-
-
 
 #endif

@@ -2,7 +2,9 @@
 
 Client::Client()
 {
-	_password = 0;
+	_password = false;
+	_nick = "";
+	_user = "";
 }
 
 Client::~Client()
@@ -36,7 +38,12 @@ void	Client::setUser(std::string user)
 
 void	Client::setPassword()
 {
-	this->_password = 1;
+	this->_password = true;
+}
+
+void	Client::setBuffer(std::string buffer)
+{
+	this->_buffer = buffer;
 }
 
 std::string	Client::getIpAdd() const
@@ -54,7 +61,12 @@ std::string	Client::getUser() const
 	return this->_user;
 }
 
-int	Client::getPassword() const
+bool	Client::getPassword() const
 {
 	return this->_password;
+}
+
+std::string	Client::getBuffer() const
+{
+	return this->_buffer;
 }

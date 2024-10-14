@@ -65,6 +65,7 @@ bool	Server::passCheck(int fd, std::string data)
 	{
 		std::string message = "Error : wrong password.\r\n";
 		send(fd, message.c_str(), message.size(), 0);
+		std::cout << "Client <" << fd << "> disconnected." << std::endl;
 		close(fd);
 		clearClients(fd);
 		return false;
@@ -87,7 +88,7 @@ void	Server::setUserCommand(int fd, std::string data)
 		if (it->getFd() == fd)
 		{
 			it->setUser(data.substr(0, pos2));
-			std::cout << "Client <" << fd << "> set user to : " << it->getUser() << std::endl;
+			std::cout << "Client <" << fd << "> set username to : " << it->getUser() << std::endl;
 		}
 	}
 	return ;
@@ -98,12 +99,24 @@ void	Server::setNickCommand(int fd, std::string data)
 	size_t pos = data.find("NICK");
 	data.erase(0, pos + 5);
 	size_t pos2 = data.find("\r\n");
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i].getNick() == data.substr(0, pos2))
+		{
+			std::string message = "Error : nickname already used.\r\n";
+			send(fd, message.c_str(), message.size(), 0);
+			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
+			close(fd);
+			clearClients(fd);
+			return ;
+		}
+	}
 	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		if (it->getFd() == fd)
 		{
 			it->setNick(data.substr(0, pos2));
-			std::cout << "Client <" << fd << "> set nick to : " << it->getNick() << std::endl;
+			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
 		}
 	}
 	return ;
@@ -153,13 +166,13 @@ void	Server::checkData(int fd, std::string data)
 	if (data.find("PASS") != std::string::npos)
 		if (passCheck(fd, data) == false)
 			return ;
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (size_t i = 0; i < _fds.size(); i++)
 	{
-		if (it->getFd() == fd && it->getPassword() == 0)
+		if (_clients[i].getFd() == fd && _clients[i].getPassword() == 0)
 		{
 			std::string message = "Error : wrong password.\r\n";
 			send(fd, message.c_str(), message.size(), 0);
-			std::cout << "Client <" << it->getFd() << "> disconnected." << std::endl;
+			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
 			close(fd);
 			clearClients(fd);
 			return ;
@@ -180,11 +193,11 @@ void	Server::checkData(int fd, std::string data)
 
 void	Server::receiveNewData(int fd)
 {
-	char	buffer[1024];
+	char	tmp[1024];
 	
-	std::memset(buffer, 0,sizeof(buffer));
+	std::memset(tmp, 0,sizeof(tmp));
 
-	int data = recv(fd, buffer, sizeof(buffer) - 1, 0);
+	int data = recv(fd, tmp, sizeof(tmp) - 1, 0);
 	if (data <= 0)
 	{
 		std::cout << "Client " << fd << " disconnected." << std::endl;
@@ -193,10 +206,20 @@ void	Server::receiveNewData(int fd)
 	}
 	else
 	{
-		buffer[data] = '\0';
-		std::cout << "Client " << fd << " > data : " << buffer << std::endl;
+		for (size_t i = 0; i < _fds.size(); i++)
+		{
+			if (_clients[i].getFd() == fd)
+			{
+				_clients[i].setBuffer(_clients[i].getBuffer() + tmp + "\0");
+				if (_clients[i].getBuffer().find("\r\n") == std::string::npos)
+					return ;
+				std::cout << "Client " << fd << " > data : " << _clients[i].getBuffer() << std::endl;
+				checkData(fd, _clients[i].getBuffer());
+				_clients[i].setBuffer("");
+			}
+		}
 	}
-	Server::checkData(fd, buffer);
+	return ;
 }
 
 void	Server::closeFds()
@@ -215,19 +238,19 @@ void	Server::closeFds()
 
 void	Server::clearClients(int fd)
 {
-	for (std::vector<struct pollfd>::iterator it = _fds.begin(); it != _fds.end(); it++)
+	for (size_t i =	0; i < _fds.size(); i++)
 	{
-		if (it->fd == fd)
+		if (_fds[i].fd == fd)
 		{
-			_fds.erase(it);
+			_fds.erase(_fds.begin() + i);
 			break;
 		}
 	}
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (size_t i =	0; i < _clients.size(); i++)
 	{
-		if (it->getFd() == fd)
+		if (_clients[i].getFd() == fd)
 		{
-			_clients.erase(it);
+			_clients.erase(_clients.begin() + i);
 			break;
 		}
 	}
