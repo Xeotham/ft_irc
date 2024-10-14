@@ -2,7 +2,7 @@
 
 bool Server::_signal = false;
 
-Server::Server(const int port, const std::string &password)
+Server::Server(int port, const std::string &password)
 {
 	_port = port;
 	_serverSocketFd = -1;
@@ -11,6 +11,8 @@ Server::Server(const int port, const std::string &password)
 
 Server::Server(const Server &ref)
 {
+	this->_port = 0;
+	this->_serverSocketFd = 0;
 	*this = ref;
 }
 
