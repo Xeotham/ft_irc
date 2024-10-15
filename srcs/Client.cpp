@@ -21,7 +21,6 @@ Client	&Client::operator=(const Client &ref)
 		return *this;
 	this->_fd = ref._fd;
 	this->_ipAdd = ref._ipAdd;
-	// this->_current_channel = ref._current_channel;
 	this->_nick = ref._nick;
 	this->_user = ref._user;
 	this->_password = ref._password;
@@ -37,33 +36,27 @@ void	Client::setFd(int fd)
 	this->_fd = fd;
 }
 
-void	Client::setIpAdd(std::string ip)
+void	Client::setIpAdd(const std::string &ip)
 {
 	this->_ipAdd = ip;
 }
 
-// void Client::setChannel(Channel &new_channel) {
-// 	if (this->getChannel() != &new_channel)
-// 		this->_current_channel = &new_channel;
-// 	else
-// 		throw (std::invalid_argument("User is already in the channel."));
-// }
-
-// Channel *Client::getChannel() const {
-// 	return (this->_current_channel);
-// }
-
-int		Client::getFd() const
+std::string	Client::getSendMsg(const std::string &cmd, const std::string &data) const
 {
-	return this->_fd;
+	std::string msg =  ":" + this->getNick() + "!" + this->getUser() + "@localhost " + cmd + " " + data + "\r\n";
+	std::cout << msg << std::endl;
+	return (msg);
 }
 
-void	Client::setNick(std::string nick)
+int		Client::getFd() const {
+	return (this->_fd);
+}
+void	Client::setNick(const std::string &nick)
 {
 	this->_nick = nick;
 }
 
-void	Client::setUser(std::string user)
+void	Client::setUser(const std::string &user)
 {
 	this->_user = user;
 }
