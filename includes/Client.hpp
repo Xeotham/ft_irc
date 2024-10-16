@@ -1,11 +1,12 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-#include <iostream>
+# include <iostream>
+# include <vector>
 
 class Client
 {
-	protected:
+	private:
 		int			_fd;
 		std::string	_ipAdd;
 		std::string	_nick;
@@ -29,6 +30,8 @@ class Client
 		std::string	getUser() const;
 		bool		getPassword() const;
 		std::string	getBuffer() const;
+		std::string        getSendMsg(const std::string &cmd, const std::string &data, const std::string &dest) const;
+		static Client    &getClientByFd(std::vector<Client> &lst, int fd);
 };
 
 #endif

@@ -1,69 +1,57 @@
 #include "Bot.hpp"
+#include "../includes/Bot.hpp"
 
-Bot::Bot() 
+Bot::Bot() {}
+Bot::Bot(const Bot& other) {(void)other;}
+Bot& Bot::operator=(const Bot& other) {(void)other;	return *this;}
+Bot::~Bot() {}
+
+void    Bot::sendCommand(int fd, Client &user)
 {
+	std::string message = ".\r\n";
+	(void)user;
+	send(fd, message.c_str(), message.size(), 0);
 }
 
-Bot::Bot(const Bot& other) : Client(other)
+void    Bot::sendJoke(int fd, Client &user)
 {
+	std::string joke[] = {" How do trees get on the Internet ?\r\n", " What is a computer’s first sign of old age ?\r\n",
+						  " What does a baby computer call his father ?\r\n", " What is an astronaut’s favorite control on the computer keyboard ?\r\n",
+						  " What happened when the computer fell on the floor ?\r\n", " Why was there a bug in the computer?\r\n",
+						  " What is a computer virus ?\r\n", " Have you heard about the Disney virus?\r\n",
+						  " What happened when a dragon breathed on several Macintosh computers ?\r\n"};
+	std::string answer[] = {" They log in.\n\r", " Loss of memory.\r\n", " Da-ta.\r\n", " The space bar.\r\n",
+							" It slipped a disk.\r\n", " It was looking for a byte to eat.\r\n", " A terminal illness.\r\n",
+							" It makes everything on your computer go Goofy.\r\n", " He wound up with baked Apples !\r\n"};
+	int i = std::rand() % 9;
+	std::string message = ":bot!" + user.getNick() + "@localhost PRIVMSG :" + user.getNick() + joke[i];
+	send(fd, message.c_str(), message.size(), 0);
+	message = ":bot!" + user.getNick() + "@localhost PRIVMSG :" + user.getNick() + answer[i];
+	send(fd, message.c_str(), message.size(), 0);
 }
 
-Bot& Bot::operator=(const Bot& other) {
-	if (this != &other) 
-	{
-		Client::operator=(other);
-	}
-	return *this;
-}
-
-Bot::~Bot()
+void    Bot::sendPong(int fd, Client &user)
 {
+	std::string message = ":bot!" + user.getNick() + "@localhost PRIVMSG :" + user.getNick() + " pong\r\n";
+	send(fd, message.c_str(), message.size(), 0);
 }
 
-bool	sendToServer(int sockfd, const std::string& msg) {
-	if (send(sockfd, msg.c_str(), msg.size(), 0) < 0)
-	{
-		std::cerr << "Failed to send message" << std::endl;
-		return false;
-	}
-	return true;
-}
-
-void Bot::initBot(const std::string& server, int port, int &sockfd, std::string password) {
-	if (connectToServer(server, port, sockfd) == true) 
-	{
-		if (sendToServer(sockfd, "PASS " + password + "\r\n") && sendToServer(sockfd, "NICK bot\r\n") && sendToServer(sockfd, "USER botname 0 * bot\r\n")) {
-			std::cout << "Connected to server" << std::endl;
-			return ;
-		}
-	}
-	close(sockfd);
-	std::cerr << "Failed to connect to server" << std::endl;
-}
-
-bool Bot::connectToServer(const std::string& server, int port, int &sockfd)
+void    Bot::botCommand(int fd, std::string data, std::vector<Client> &vec)
 {
-	struct hostent *host;
+	int i = 0;
+	size_t pos = 0;
+	Client &user = Client::getClientByFd(vec, fd);
+	std::string cmd[] = {"cmd\r\n", "joke\r\n", "ping\r\n"};
+	t_func func[] = {&Bot::sendCommand, &Bot::sendJoke, &Bot::sendPong};
+	if (data.find("PRIVMSG") != std::string::npos)
+		pos = data.find(":");
+	else
+		pos = data.find(" ");
+	data.erase(0, pos + 1);
 
-	if ((host = gethostbyname(server.c_str())) == NULL) {
-		std::cerr << "Failed to get host by" << std::endl;
-		return false;
-	}
-	
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd < 0) {
-		std::cerr << "Error creating socket" << std::endl;
-		return false;
-	}
-
-	struct sockaddr_in server_addr;
-	std::memset(&server_addr, 0, sizeof(server_addr));
-	server_addr.sin_family = AF_INET;
-	server_addr.sin_port = htons(port);
-
-	if (connect(sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr)) < 0) {
-		std::cerr << "Connection Failed" << std::endl;
-		return false;
-	}
-	return true;
+	while(i < 3 && cmd[i].compare(data))
+		i++;
+	if (i < 3)
+		(*func[i])(fd, user);
+	return ;
 }

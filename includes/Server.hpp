@@ -14,8 +14,13 @@
 # include <limits>
 # include <cstring>
 # include <cstdlib>
+# include <sstream>
+# include <netdb.h>
+# include <cstdlib>
+# include <ctime>
 
 # include "Client.hpp"
+# include "Bot.hpp"
 
 class Server
 {
@@ -27,16 +32,16 @@ class Server
 		static bool					_signal;
 		std::string					_password;
 
+
 		void		serverSocket();
 
 		void		acceptNewClient();
 		void		receiveNewData(int fd);
 		void		checkData(int fd, std::string data);
 
-		void		privmsgCommand(int fd, std::string data);
+		void		privMsgCommand(int fd, std::string data);
 		void		setNickCommand(int fd, std::string data);
 		void		setUserCommand(int fd, std::string data);
-		void		joinCommand();
 		bool		passCheck(int fd, std::string data);
 
 		void		clearClients(int fd);

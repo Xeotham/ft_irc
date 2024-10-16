@@ -1,24 +1,27 @@
 #ifndef BOT_HPP
-#define BOT_HPP
+# define BOT_HPP
 
 # include "Client.hpp"
 # include "Server.hpp"
 # include <netdb.h>
 
-class Bot : public Client 
+class Bot
 {
-public:
+private:
 	Bot();
 	Bot(const Bot& other);
 	Bot& operator=(const Bot& other);
 
 	~Bot();
+	static void    sendCommand(int fd, Client &user);
+	static void    sendJoke(int fd, Client &user);
+	static void    sendPong(int fd, Client &user);
 
-private:
+public:
+	static void    botCommand(int fd, std::string data, std::vector<Client> &vec);
 
-	void	initBot(const std::string& server, int port, int &sockfd, std::string password);
-	bool	sendToServer(int sockfd, const std::string& msg);
-	bool	connectToServer(const std::string& server, int port, int &sockfd);
 };
 
-#endif // BOT_HPP
+typedef void (*t_func)(int, Client &);
+
+#endif

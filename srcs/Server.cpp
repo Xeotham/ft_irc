@@ -4,6 +4,7 @@ bool Server::_signal = false;
 
 Server::Server(const int port, const std::string &password)
 {
+	std::srand(time(0));
 	_port = port;
 	_serverSocketFd = -1;
 	_password = password;
@@ -16,7 +17,14 @@ Server::Server(const Server &ref)
 
 Server& Server::operator=(const Server &rhs)
 {
-	(void)rhs;
+	if (this != &rhs)
+    {
+        _port = rhs._port;
+        _serverSocketFd = rhs._serverSocketFd;
+        _clients = rhs._clients;
+        _fds = rhs._fds;
+        _password = rhs._password;
+    }
 	return *this;
 }
 
@@ -34,7 +42,7 @@ void	Server::signalHandler(int signum)
 void		Server::acceptNewClient()
 {
 	Client cl;
-	struct sockaddr_in	clientAdress;
+	struct sockaddr_in	clientAdress = {};
 	struct pollfd		newPoll;
 	socklen_t			len = sizeof(clientAdress);
 
@@ -58,6 +66,18 @@ void		Server::acceptNewClient()
 
 bool	Server::passCheck(int fd, std::string data)
 {
+	Client &user = Client::getClientByFd(_clients, fd);
+	if (user.getPassword() || ((data.find("CAP LS 302") != std::string::npos) && (data.find("PASS") == std::string::npos) && (data.find("NICK") == std::string::npos)))
+		return true;
+	if ((data.find("CAP LS 302") != std::string::npos) && (data.find("PASS") == std::string::npos) && (data.find("NICK") != std::string::npos))
+	{
+		std::string message = "Error : wrong password.\r\n";
+		send(fd, message.c_str(), message.size(), 0);
+		std::cout << "Client <" << fd << "> disconnected." << std::endl;
+		close(fd);
+		clearClients(fd);
+		return false;
+	}
 	size_t pos = data.find("PASS");
 	data.erase(0, pos + 5);
 	size_t pos2 = data.find("\r\n");
@@ -70,16 +90,13 @@ bool	Server::passCheck(int fd, std::string data)
 		clearClients(fd);
 		return false;
 	}
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->getFd() == fd)
-			it->setPassword();
-	}
+	user.setPassword();
 	return true;
 }
 
 void	Server::setUserCommand(int fd, std::string data)
 {
+//	USER <username> <hostname> <servername> :<realname>
 	size_t pos = data.find("USER");
 	data.erase(0, pos + 5);
 	size_t pos2 = data.find(" ");
@@ -122,7 +139,7 @@ void	Server::setNickCommand(int fd, std::string data)
 	return ;
 }
 
-void	Server::privmsgCommand(int fd, std::string data)
+void	Server::privMsgCommand(int fd, std::string data)
 {
 	std::string message;
 	data.erase(0, 8);
@@ -163,32 +180,20 @@ void	Server::privmsgCommand(int fd, std::string data)
 
 void	Server::checkData(int fd, std::string data)
 {
-	if (data.find("PASS") != std::string::npos)
-		if (passCheck(fd, data) == false)
-			return ;
-	for (size_t i = 0; i < _fds.size(); i++)
-	{
-		if (_clients[i].getFd() == fd && _clients[i].getPassword() == 0)
-		{
-			std::string message = "Error : wrong password.\r\n";
-			send(fd, message.c_str(), message.size(), 0);
-			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
-			close(fd);
-			clearClients(fd);
-			return ;
-		}
-	}
+	if (!passCheck(fd, data))
+		return ;
 	if (data.find("JOIN") != std::string::npos)
 		return ;
-	if (data.find("PRIVMSG") != std::string::npos)
-		privmsgCommand(fd, data);
+	if (data.find("PRIVMSG") != std::string::npos && data.find("PRIVMSG bot :") != 0)
+		privMsgCommand(fd, data);
 	if (data.find("QUIT") != std::string::npos)
 		return ;
 	if (data.find("NICK") != std::string::npos)
 		setNickCommand(fd, data);
 	if (data.find("USER") != std::string::npos)
 		setUserCommand(fd, data);
-	
+	if (data.find("bot") != std::string::npos)
+		Bot::botCommand(fd, data, _clients);
 }
 
 void	Server::receiveNewData(int fd)

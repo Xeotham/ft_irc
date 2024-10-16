@@ -70,3 +70,19 @@ std::string	Client::getBuffer() const
 {
 	return this->_buffer;
 }
+
+std::string    Client::getSendMsg(const std::string &cmd, const std::string &data, const std::string &dest) const
+{
+	std::string msg =  ":" + this->getNick() + "!" + dest + "@localhost " + cmd + " :" + data + "\r\n";
+	return (msg);
+}
+
+Client    &Client::getClientByFd(std::vector<Client> &lst, int fd)
+{
+	for (std::vector<Client>::iterator it = lst.begin(); it != lst.end(); it++) { // NOLINT(*-use-auto)
+		if (it->getFd() == fd) {
+			return (*it);
+		}
+	}
+	throw (std::invalid_argument("Client not found."));
+}
