@@ -21,6 +21,7 @@
 
 # include "Client.hpp"
 # include "Bot.hpp"
+# include "Channel.hpp"
 
 class Server
 {
@@ -29,9 +30,9 @@ class Server
 		int							_serverSocketFd;
 		std::vector<Client> 		_clients;
 		std::vector<struct pollfd>	_fds;
+		std::vector<Channel>		_channels;
 		static bool					_signal;
 		std::string					_password;
-
 
 		void		serverSocket();
 
@@ -42,17 +43,21 @@ class Server
 		void		privMsgCommand(int fd, std::string data);
 		void		setNickCommand(int fd, std::string data);
 		void		setUserCommand(int fd, std::string data);
+		void		joinCommand(int fd, std::string data);
 		bool		passCheck(int fd, std::string data);
 
 		void		clearClients(int fd);
+
+		void		addChannel(const std::string &name);
+
 	public:
-		Server(const int port, const std::string &password);
+		Server(int port, const std::string &password);
 		Server(const Server &ref);
 		Server& operator=(const Server &rhs);
 		~Server();
 		
-		void	serverInit();
-		void	closeFds();
+		void			serverInit();
+		void			closeFds();
 		static void		signalHandler(int signum);
 };
 

@@ -6,32 +6,38 @@
 
 class Client
 {
+	public:
+		Client();
+		Client(const Client &ref);
+		~Client();
+
+		Client	&operator=(const Client &ref);
+
+		void	setFd(int fd);
+		void	setIpAdd(const std::string &add);
+		void	setNick(const std::string &nick);
+		void	setUser(const std::string &user);
+		void	setPassword();
+		void	setBuffer(std::string buffer);
+
+		int				getFd() const;
+		std::string		getIpAdd() const;
+		std::string		getNick() const;
+		std::string		getUser() const;
+		std::string		getBuffer() const;
+		bool			getPassword() const;
+		std::string		getSendMsg(const std::string &cmd, const std::string &data) const;
+		static Client	&getClientByFd(std::vector<Client> &lst, int fd);
 	private:
 		int			_fd;
 		std::string	_ipAdd;
 		std::string	_nick;
 		std::string	_user;
-		std::string	_buffer;
+		std::string _buffer;
 		bool		_password;
-	public:
-		Client();
-		virtual ~Client();
-
-		void	setFd(int fd);
-		void	setIpAdd(std::string add);
-		void	setNick(std::string nick);
-		void	setUser(std::string user);
-		void	setPassword();
-		void	setBuffer(std::string buffer);
-
-		int			getFd() const;
-		std::string	getIpAdd() const;
-		std::string	getNick() const;
-		std::string	getUser() const;
-		bool		getPassword() const;
-		std::string	getBuffer() const;
-		std::string        getSendMsg(const std::string &cmd, const std::string &data, const std::string &dest) const;
-		static Client    &getClientByFd(std::vector<Client> &lst, int fd);
 };
+
+
+
 
 #endif

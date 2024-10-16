@@ -3,6 +3,7 @@ NAME = ircserv
 SRCS = 	main.cpp \
 		Server.cpp \
 		Client.cpp \
+		Channel.cpp \
 		Bot.cpp
 
 SRCS_DIR = srcs/

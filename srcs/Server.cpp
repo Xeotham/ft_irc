@@ -99,9 +99,8 @@ void	Server::setUserCommand(int fd, std::string data)
 //	USER <username> <hostname> <servername> :<realname>
 	size_t pos = data.find("USER");
 	data.erase(0, pos + 5);
-	size_t pos2 = data.find(" ");
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
+	size_t pos2 = data.find(' ');
+	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++) {
 		if (it->getFd() == fd)
 		{
 			it->setUser(data.substr(0, pos2));
@@ -143,39 +142,58 @@ void	Server::privMsgCommand(int fd, std::string data)
 {
 	std::string message;
 	data.erase(0, 8);
-	size_t pos = data.find(" ");
+	size_t pos = data.find(' ');
 	std::string dest = data.substr(0, pos);
 	std::cout << "dest : " << dest << std::endl;
-	if (dest.find_first_of("#") != std::string::npos)
-	{
-		// std::string channel = dest;
-		std::string message = "Error : channel not supported.\r\n";
-		send(fd, message.c_str(), message.size(), 0);
-		return ;
-	}
-	else
-	{
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		{
-			if (it->getFd() == fd)
-			{
-				message = it->getNick() + " " + data.substr(pos + 1);
-				break;
+	Client &user = Client::getClientByFd(this->_clients, fd);
+	if (dest.find_first_of('#') != std::string::npos) {
+		Channel &chan = Channel::getChannelByName(this->_channels, dest);
+		for (std::vector<Client>::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+			// message = ":" + user.getNick() + "!" + user.getUser() + "@localhost " + "PRIVMSG " + data + "\r\n";
+			message = user.getSendMsg("PRIVMSG", data);
+			if (it->getFd() != fd) {
+				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << message <<
+						std::endl;
+				send(it->getFd(), message.c_str(), message.size(), 0);
 			}
 		}
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-		{
-			if (it->getNick() == dest)
-			{
+	} else {
+		message = user.getSendMsg("PRIVMSG", data);
+		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++) {
+			if (it->getNick() == dest) {
 				send(it->getFd(), message.c_str(), message.size(), 0);
 				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << message << std::endl;
 				return ;
 			}
 		}
-		std::string message = "Error : user not found.\r\n";
-		send(fd, message.c_str(), message.size(), 0);
-		return ;
+		std::string err_message = "Error : user not found.\r\n";
+		send(fd, err_message.c_str(), err_message.size(), 0);
 	}
+}
+
+void Server::joinCommand(int fd, std::string data) {
+	data.erase(0, 5);
+	data.resize(data.size() - 2);
+	Client &user = Client::getClientByFd(this->_clients, fd);
+	std::cout << user.getNick() << " try to join" << std::endl;
+	try {
+		Channel &chan = Channel::getChannelByName(this->_channels, data);
+		chan.addUser(user);
+		std::cout << "Channel already exist" << std::endl;
+	} catch (std::exception &exc) {
+		try {
+			Channel chan(data);
+			chan.addUser(user);
+			this->_channels.push_back(chan);
+		} catch (std::exception &e) {
+			std::string msg = e.what();
+			msg += "\r\n";
+			send(fd, msg.c_str(), msg.size(), 0);
+			return;
+		}
+	}
+	std::string msg = user.getSendMsg("JOIN", data);
+	send(fd, msg.c_str(), msg.size(), 0);
 }
 
 void	Server::checkData(int fd, std::string data)
@@ -192,6 +210,8 @@ void	Server::checkData(int fd, std::string data)
 		setNickCommand(fd, data);
 	if (data.find("USER") != std::string::npos)
 		setUserCommand(fd, data);
+	if (data.find("JOIN") != std::string::npos)
+		joinCommand(fd, data);
 	if (data.find("bot") != std::string::npos)
 		Bot::botCommand(fd, data, _clients);
 }
@@ -199,7 +219,7 @@ void	Server::checkData(int fd, std::string data)
 void	Server::receiveNewData(int fd)
 {
 	char	tmp[1024];
-	
+
 	std::memset(tmp, 0,sizeof(tmp));
 
 	int data = recv(fd, tmp, sizeof(tmp) - 1, 0);
@@ -273,12 +293,12 @@ void	Server::serverSocket()
 	_serverSocketFd = socket(AF_INET, SOCK_STREAM, 0);
 	if (_serverSocketFd == -1)
 		throw (std::runtime_error("Error : socket creation."));
-	int	opt = 1;
+	int opt = 1;
 	if (setsockopt(_serverSocketFd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) == -1)
 		throw (std::runtime_error("Error : cannot setup socket option (SO_REUSEADDR)."));
 	if (fcntl(_serverSocketFd, F_SETFL, O_NONBLOCK) == -1)
 		throw (std::runtime_error("Error : cannot setup option (O_NONBLOCK)."));
-	if (bind(_serverSocketFd, (const struct sockaddr *)&serverAdress, sizeof(serverAdress)) == -1)
+	if (bind(_serverSocketFd, (const struct sockaddr *) &serverAdress, sizeof(serverAdress)) == -1)
 		throw (std::runtime_error("Error : cannot bind socket."));
 	if (listen(_serverSocketFd, SOMAXCONN) == -1)
 		throw (std::runtime_error("Error : cannot listen socket."));

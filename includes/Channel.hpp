@@ -1,38 +1,33 @@
 #ifndef CHANNEL_HPP
-#define CHANNEL_HPP
+# define CHANNEL_HPP
+
 
 #include <string>
 #include <vector>
+#include <Client.hpp>
+
+class Client;
 
 class Channel {
-public:
-	// Default constructor
-	Channel();
-
-	// Parameterized constructor
-	Channel(const std::string& name);
-
-	// Copy constructor
-	Channel(const Channel& other);
-
-	// Copy assignment operator
-	Channel& operator=(const Channel& other);
-
-	// Destructor
-	~Channel();
-
-	// Getters and Setters
-	const std::string& getName() const;
-	void setName(const std::string& name);
-
-	// Other member functions
-	void addUser(const std::string& user);
-	void removeUser(const std::string& user);
-	const std::vector<std::string>& getUsers() const;
-
-private:
-	std::string name;
-	std::vector<std::string> users;
+	public:
+		Channel(const std::string& name);
+		Channel(const Channel& other);
+		~Channel();
+    public:
+		Channel& operator=(const Channel& other);
+	public:
+		void					setName(const std::string& name);
+		void					addUser(Client& user);
+		void					removeUser(const Client& user);
+		std::vector<Client>		&getUsers();
+		const std::string		&getName() const;
+	public:
+		static Channel	&getChannelByName(std::vector<Channel> &lst, const std::string &name);
+	private:
+		Channel();
+	private:
+		std::string			_name;
+		std::vector<Client> _users;
 };
 
 #endif // CHANNEL_HPP
