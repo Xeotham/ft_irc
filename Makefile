@@ -4,6 +4,7 @@ SRCS = 	main.cpp \
 		Server.cpp \
 		Client.cpp \
 		Channel.cpp \
+		Messages.cpp \
 		Bot.cpp
 
 SRCS_DIR = srcs/

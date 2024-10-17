@@ -9,6 +9,15 @@ Client::Client()
 	this->_password = false;
 }
 
+Client::Client(const std::string &nick, const std::string &user)
+{
+	this->_fd = -1;
+	this->_ipAdd = "";
+	this->_nick = nick;
+	this->_user = user;
+	this->_password = false;
+}
+
 Client::Client(const Client &ref)
 {
 	*this = ref;

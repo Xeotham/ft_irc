@@ -1,14 +1,14 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-# include <iostream>
-# include <vector>
+#include <Params.hpp>
 
 class Client
 {
 	public:
 		Client();
 		Client(const Client &ref);
+		Client(const std::string &nick, const std::string &user);
 		~Client();
 
 		Client	&operator=(const Client &ref);
@@ -36,8 +36,5 @@ class Client
 		std::string _buffer;
 		bool		_password;
 };
-
-
-
 
 #endif

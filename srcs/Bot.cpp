@@ -24,16 +24,13 @@ void    Bot::sendJoke(int fd, Client &user)
 							" It slipped a disk.\r\n", " It was looking for a byte to eat.\r\n", " A terminal illness.\r\n",
 							" It makes everything on your computer go Goofy.\r\n", " He wound up with baked Apples !\r\n"};
 	int i = std::rand() % 9;
-	std::string message = ":bot!" + user.getNick() + "@localhost PRIVMSG :" + user.getNick() + joke[i];
-	send(fd, message.c_str(), message.size(), 0);
-	message = ":bot!" + user.getNick() + "@localhost PRIVMSG :" + user.getNick() + answer[i];
-	send(fd, message.c_str(), message.size(), 0);
+	Messages::sendMsg(fd, user.getNick() + joke[i], BOT, MSG);
+	Messages::sendMsg(fd, user.getNick() + answer[i], BOT, MSG);
 }
 
 void    Bot::sendPong(int fd, Client &user)
 {
-	std::string message = ":bot!" + user.getNick() + "@localhost PRIVMSG :" + user.getNick() + " pong\r\n";
-	send(fd, message.c_str(), message.size(), 0);
+	Messages::sendMsg(fd, user.getNick() + " pong", BOT, MSG);
 }
 
 void    Bot::botCommand(int fd, std::string data, std::vector<Client> &vec)
@@ -44,14 +41,13 @@ void    Bot::botCommand(int fd, std::string data, std::vector<Client> &vec)
 	std::string cmd[] = {"cmd\r\n", "joke\r\n", "ping\r\n"};
 	t_func func[] = {&Bot::sendCommand, &Bot::sendJoke, &Bot::sendPong};
 	if (data.find("PRIVMSG") != std::string::npos)
-		pos = data.find(":");
+		pos = data.find(':');
 	else
-		pos = data.find(" ");
+		pos = data.find(' ');
 	data.erase(0, pos + 1);
 
 	while(i < 3 && cmd[i].compare(data))
 		i++;
 	if (i < 3)
 		(*func[i])(fd, user);
-	return ;
 }

@@ -2,7 +2,7 @@
 
 bool Server::_signal = false;
 
-Server::Server(const int port, const std::string &password)
+Server::Server(int port, const std::string &password)
 {
 	std::srand(time(0));
 	_port = port;
@@ -12,6 +12,8 @@ Server::Server(const int port, const std::string &password)
 
 Server::Server(const Server &ref)
 {
+	this->_port = 0;
+	this->_serverSocketFd = 0;
 	*this = ref;
 }
 
@@ -100,7 +102,7 @@ void	Server::setUserCommand(int fd, std::string data)
 	size_t pos = data.find("USER");
 	data.erase(0, pos + 5);
 	size_t pos2 = data.find(' ');
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++) {
+	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++) {
 		if (it->getFd() == fd)
 		{
 			it->setUser(data.substr(0, pos2));
@@ -127,7 +129,7 @@ void	Server::setNickCommand(int fd, std::string data)
 			return ;
 		}
 	}
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
+	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++)
 	{
 		if (it->getFd() == fd)
 		{
@@ -140,29 +142,22 @@ void	Server::setNickCommand(int fd, std::string data)
 
 void	Server::privMsgCommand(int fd, std::string data)
 {
-	std::string message;
 	data.erase(0, 8);
-	size_t pos = data.find(' ');
-	std::string dest = data.substr(0, pos);
-	std::cout << "dest : " << dest << std::endl;
+	std::string dest = data.substr(0, data.find(' '));
 	Client &user = Client::getClientByFd(this->_clients, fd);
 	if (dest.find_first_of('#') != std::string::npos) {
 		Channel &chan = Channel::getChannelByName(this->_channels, dest);
-		for (std::vector<Client>::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-			// message = ":" + user.getNick() + "!" + user.getUser() + "@localhost " + "PRIVMSG " + data + "\r\n";
-			message = user.getSendMsg("PRIVMSG", data);
+		for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
 			if (it->getFd() != fd) {
-				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << message <<
-						std::endl;
-				send(it->getFd(), message.c_str(), message.size(), 0);
+				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << data << std::endl;
+				Messages::sendMsg(it->getFd(), data, user, MSG);
 			}
 		}
-	} else {
-		message = user.getSendMsg("PRIVMSG", data);
-		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++) {
+	}
+	else {
+		for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++) {
 			if (it->getNick() == dest) {
-				send(it->getFd(), message.c_str(), message.size(), 0);
-				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << message << std::endl;
+				Messages::sendMsg(it->getFd(), data, user, MSG);
 				return ;
 			}
 		}
@@ -171,38 +166,56 @@ void	Server::privMsgCommand(int fd, std::string data)
 	}
 }
 
+void	Server::joinOneChannel(Client &user, const std::pair<std::string, std::string> &data)
+{
+	try {
+		Channel &chan = Channel::getChannelByName(this->_channels, data.first);
+		std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
+		if (!chan.getPassword().empty() && chan.getPassword() != data.second)
+			throw (std::invalid_argument("Error : wrong password."));
+		chan.addUser(user);
+	}
+	catch (std::exception &ex) {
+		if (std::string(ex.what()) == "Error : wrong password.")
+			throw (std::invalid_argument("Error : wrong password to join " + data.first + "."));
+		try {
+			std::cout << "When creating Channel " << data.first << " & " << data.second << std::endl;
+			Channel chan(data.first, data.second);
+			std::cout << "When channel created " << chan.getName() << " & " << chan.getPassword() << std::endl;
+			chan.addUser(user);
+			this->_channels.push_back(chan);
+		}
+		catch (std::exception &e) {
+			throw (std::invalid_argument(e.what()));
+		}
+	}
+}
+
 void Server::joinCommand(int fd, std::string data) {
 	data.erase(0, 5);
 	data.resize(data.size() - 2);
 	Client &user = Client::getClientByFd(this->_clients, fd);
+	std::map<std::string, std::string>	channels = Channel::splitChannels(data);
 	std::cout << user.getNick() << " try to join" << std::endl;
-	try {
-		Channel &chan = Channel::getChannelByName(this->_channels, data);
-		chan.addUser(user);
-		std::cout << "Channel already exist" << std::endl;
-	} catch (std::exception &exc) {
+	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
 		try {
-			Channel chan(data);
-			chan.addUser(user);
-			this->_channels.push_back(chan);
-		} catch (std::exception &e) {
+			this->joinOneChannel(user, *it);
+			Messages::sendMsg(fd, it->first, user, JOIN);
+		}
+		catch (std::exception &e) {
+			std::cout << e.what() << std::endl;
 			std::string msg = e.what();
 			msg += "\r\n";
 			send(fd, msg.c_str(), msg.size(), 0);
-			return;
 		}
 	}
-	std::string msg = user.getSendMsg("JOIN", data);
-	send(fd, msg.c_str(), msg.size(), 0);
 }
 
 void	Server::checkData(int fd, std::string data)
 {
 	if (!passCheck(fd, data))
 		return ;
-	if (data.find("JOIN") != std::string::npos)
-		return ;
-	if (data.find("PRIVMSG") != std::string::npos && data.find("PRIVMSG bot :") != 0)
+	if (data.find("PRIVMSG") != std::string::npos && data.find("PRIVMSG Bot :") != 0)
 		privMsgCommand(fd, data);
 	if (data.find("QUIT") != std::string::npos)
 		return ;
@@ -212,7 +225,7 @@ void	Server::checkData(int fd, std::string data)
 		setUserCommand(fd, data);
 	if (data.find("JOIN") != std::string::npos)
 		joinCommand(fd, data);
-	if (data.find("bot") != std::string::npos)
+	if (data.find("bot") != std::string::npos || data.find("Bot") != std::string::npos)
 		Bot::botCommand(fd, data, _clients);
 }
 
@@ -244,7 +257,6 @@ void	Server::receiveNewData(int fd)
 			}
 		}
 	}
-	return ;
 }
 
 void	Server::closeFds()
@@ -329,4 +341,19 @@ void	Server::serverInit()
 		}
 	}
 	closeFds();
+}
+
+void	Server::addChannel(const std::string &name)
+{
+	try {
+		for (std::vector<Channel>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		{
+			if (it->getName() == name)
+				throw (std::invalid_argument("Channel already exists."));
+		}
+		Channel ch(name);
+		_channels.push_back(ch);
+	} catch (std::exception &e) {
+		std::cerr << e.what() << std::endl;
+	}
 }
