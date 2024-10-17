@@ -18,6 +18,7 @@
 # include <netdb.h>
 # include <cstdlib>
 # include <ctime>
+# include <string>
 
 # include "Client.hpp"
 # include "Bot.hpp"
@@ -38,12 +39,13 @@ class Server
 
 		void		acceptNewClient();
 		void		receiveNewData(int fd);
-		void		checkData(int fd, std::string data);
+		bool		checkData(int fd, std::string data);
 
 		void		privMsgCommand(int fd, std::string data);
-		void		setNickCommand(int fd, std::string data);
-		void		setUserCommand(int fd, std::string data);
+		bool		nickCommand(int fd, std::string data);
+		void		userCommand(int fd, std::string data);
 		void		joinCommand(int fd, std::string data);
+		void        quitCommand(int fd);
 		bool		passCheck(int fd, std::string data);
 
 		void		clearClients(int fd);

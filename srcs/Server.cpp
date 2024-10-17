@@ -43,7 +43,7 @@ void		Server::acceptNewClient()
 {
 	Client cl;
 	struct sockaddr_in	clientAdress = {};
-	struct pollfd		newPoll;
+	struct pollfd		newPoll = {};
 	socklen_t			len = sizeof(clientAdress);
 
 	int	clientSocketFd = accept(_serverSocketFd,(sockaddr *)&clientAdress, &len);
@@ -64,24 +64,12 @@ void		Server::acceptNewClient()
 	std::cout << "New client <" << clientSocketFd << "> connected." << std::endl;
 }
 
-bool	Server::passCheck(int fd, std::string data)
+bool	Server::passCheck(int fd, std::string line)
 {
 	Client &user = Client::getClientByFd(_clients, fd);
-	if (user.getPassword() || ((data.find("CAP LS 302") != std::string::npos) && (data.find("PASS") == std::string::npos) && (data.find("NICK") == std::string::npos)))
+	if (line == "LS 302")
 		return true;
-	if ((data.find("CAP LS 302") != std::string::npos) && (data.find("PASS") == std::string::npos) && (data.find("NICK") != std::string::npos))
-	{
-		std::string message = "Error : wrong password.\r\n";
-		send(fd, message.c_str(), message.size(), 0);
-		std::cout << "Client <" << fd << "> disconnected." << std::endl;
-		close(fd);
-		clearClients(fd);
-		return false;
-	}
-	size_t pos = data.find("PASS");
-	data.erase(0, pos + 5);
-	size_t pos2 = data.find("\r\n");
-	if (data.substr(0, pos2) != _password)
+	if (line != _password && !_password.empty())
 	{
 		std::string message = "Error : wrong password.\r\n";
 		send(fd, message.c_str(), message.size(), 0);
@@ -94,63 +82,55 @@ bool	Server::passCheck(int fd, std::string data)
 	return true;
 }
 
-void	Server::setUserCommand(int fd, std::string data)
+void    Server::quitCommand(int fd)
 {
-//	USER <username> <hostname> <servername> :<realname>
-	size_t pos = data.find("USER");
-	data.erase(0, pos + 5);
-	size_t pos2 = data.find(' ');
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++) {
-		if (it->getFd() == fd)
-		{
-			it->setUser(data.substr(0, pos2));
-			std::cout << "Client <" << fd << "> set username to : " << it->getUser() << std::endl;
-		}
-	}
-	return ;
+	std::cout << "Client " << fd << " disconnected." << std::endl;
+	clearClients(fd);
+	close(fd);
 }
 
-void	Server::setNickCommand(int fd, std::string data)
+
+void	Server::userCommand(int fd, std::string line)
 {
-	size_t pos = data.find("NICK");
-	data.erase(0, pos + 5);
-	size_t pos2 = data.find("\r\n");
+//	USER <username> <hostname> <servername> :<realname>
+	Client &user = Client::getClientByFd(_clients, fd);
+	line.resize(line.find_first_of(' '));
+	user.setUser(line);
+	std::cout << "Client <" << fd << "> set username to : " << user.getUser() << std::endl;
+}
+
+bool	Server::nickCommand(int fd, std::string line)
+{
 	for (size_t i = 0; i < _clients.size(); i++)
 	{
-		if (_clients[i].getNick() == data.substr(0, pos2))
+		if (_clients[i].getNick() == line)
 		{
 			std::string message = "Error : nickname already used.\r\n";
 			send(fd, message.c_str(), message.size(), 0);
 			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
 			close(fd);
 			clearClients(fd);
-			return ;
+			return false;
 		}
 	}
-	for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->getFd() == fd)
-		{
-			it->setNick(data.substr(0, pos2));
-			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
-		}
-	}
-	return ;
+	Client &user = Client::getClientByFd(_clients, fd);
+	user.setNick(line);
+	std::cout << "Client <" << fd << "> set nickname to : " << user.getNick() << std::endl;
+	return true;
 }
 
-void	Server::privMsgCommand(int fd, std::string data)
+void	Server::privMsgCommand(int fd, std::string line)
 {
 	std::string message;
-	data.erase(0, 8);
-	size_t pos = data.find(' ');
-	std::string dest = data.substr(0, pos);
+	size_t pos = line.find(' ');
+	std::string dest = line.substr(0, pos);
 	std::cout << "dest : " << dest << std::endl;
 	Client &user = Client::getClientByFd(this->_clients, fd);
 	if (dest.find_first_of('#') != std::string::npos) {
 		Channel &chan = Channel::getChannelByName(this->_channels, dest);
 		for (std::vector<Client>::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-			// message = ":" + user.getNick() + "!" + user.getUser() + "@localhost " + "PRIVMSG " + data + "\r\n";
-			message = user.getSendMsg("PRIVMSG", data);
+			// message = ":" + user.getNick() + "!" + user.getUser() + "@localhost " + "PRIVMSG " + line + "\r\n";
+			message = user.getSendMsg("PRIVMSG", line);
 			if (it->getFd() != fd) {
 				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << message <<
 						std::endl;
@@ -158,7 +138,7 @@ void	Server::privMsgCommand(int fd, std::string data)
 			}
 		}
 	} else {
-		message = user.getSendMsg("PRIVMSG", data);
+		message = user.getSendMsg("PRIVMSG", line);
 		for (std::vector<Client>::iterator it = _clients.begin(); it != _clients.end(); it++) {
 			if (it->getNick() == dest) {
 				send(it->getFd(), message.c_str(), message.size(), 0);
@@ -171,18 +151,17 @@ void	Server::privMsgCommand(int fd, std::string data)
 	}
 }
 
-void Server::joinCommand(int fd, std::string data) {
-	data.erase(0, 5);
-	data.resize(data.size() - 2);
+void Server::joinCommand(int fd, std::string line)
+{
 	Client &user = Client::getClientByFd(this->_clients, fd);
 	std::cout << user.getNick() << " try to join" << std::endl;
 	try {
-		Channel &chan = Channel::getChannelByName(this->_channels, data);
+		Channel &chan = Channel::getChannelByName(this->_channels, line);
 		chan.addUser(user);
 		std::cout << "Channel already exist" << std::endl;
 	} catch (std::exception &exc) {
 		try {
-			Channel chan(data);
+			Channel chan(line);
 			chan.addUser(user);
 			this->_channels.push_back(chan);
 		} catch (std::exception &e) {
@@ -192,28 +171,49 @@ void Server::joinCommand(int fd, std::string data) {
 			return;
 		}
 	}
-	std::string msg = user.getSendMsg("JOIN", data);
+	std::string msg = user.getSendMsg("JOIN", line);
 	send(fd, msg.c_str(), msg.size(), 0);
 }
 
-void	Server::checkData(int fd, std::string data)
+bool	Server::checkData(int fd, std::string data)
 {
-	if (!passCheck(fd, data))
-		return ;
-	if (data.find("JOIN") != std::string::npos)
-		return ;
-	if (data.find("PRIVMSG") != std::string::npos && data.find("PRIVMSG bot :") != 0)
-		privMsgCommand(fd, data);
-	if (data.find("QUIT") != std::string::npos)
-		return ;
-	if (data.find("NICK") != std::string::npos)
-		setNickCommand(fd, data);
-	if (data.find("USER") != std::string::npos)
-		setUserCommand(fd, data);
-	if (data.find("JOIN") != std::string::npos)
-		joinCommand(fd, data);
-	if (data.find("bot") != std::string::npos)
-		Bot::botCommand(fd, data, _clients);
+	Client &user = Client::getClientByFd(this->_clients, fd);
+	while (size_t pos = data.find_first_of('\n'))
+	{
+		if (data.size() < 2)
+			return true;
+		std::string line = data.substr(0, pos + 1);
+		data.erase(0, line.size());
+		size_t pos2 = line.find_first_of(' ');
+		std::string command = line.substr(0, pos2);
+		line.erase(0, pos2 + 1);
+		line.resize(line.size() - 2);
+
+		if (!user.getPassword())
+		{
+			if (!passCheck(fd, line))
+				return false;
+		}
+		else if (command == "PRIVMSG")
+			privMsgCommand(fd, line);
+		else if (command == "QUIT")
+		{
+			quitCommand(fd);
+			return false;
+		}
+		else if (command == "NICK")
+		{
+			if (!nickCommand(fd, line))
+				return false;
+		}
+		else if (command == "USER")
+			userCommand(fd, line);
+		else if (command == "JOIN")
+			joinCommand(fd, line);
+		else if (command == "bot")
+			Bot::botCommand(fd, line, _clients);
+	}
+	return true;
 }
 
 void	Server::receiveNewData(int fd)
@@ -222,29 +222,29 @@ void	Server::receiveNewData(int fd)
 
 	std::memset(tmp, 0,sizeof(tmp));
 
-	int data = recv(fd, tmp, sizeof(tmp) - 1, 0);
-	if (data <= 0)
+	size_t data = recv(fd, tmp, sizeof(tmp) - 1, 0);
+	/*if (data <= 0)
 	{
 		std::cout << "Client " << fd << " disconnected." << std::endl;
 		clearClients(fd);
 		close(fd);
-	}
-	else
+		return ;
+	}*/
+	if (data > 0)
 	{
-		for (size_t i = 0; i < _fds.size(); i++)
+		for (size_t i = 0; i < _clients.size(); i++)
 		{
 			if (_clients[i].getFd() == fd)
 			{
-				_clients[i].setBuffer(_clients[i].getBuffer() + tmp + "\0");
+				_clients[i].setBuffer(_clients[i].getBuffer() + tmp + '\0');
 				if (_clients[i].getBuffer().find("\r\n") == std::string::npos)
 					return ;
 				std::cout << "Client " << fd << " > data : " << _clients[i].getBuffer() << std::endl;
-				checkData(fd, _clients[i].getBuffer());
-				_clients[i].setBuffer("");
+				if (checkData(fd, _clients[i].getBuffer()))
+					_clients[i].setBuffer("");
 			}
 		}
 	}
-	return ;
 }
 
 void	Server::closeFds()
@@ -283,8 +283,8 @@ void	Server::clearClients(int fd)
 
 void	Server::serverSocket()
 {
-	struct sockaddr_in	serverAdress;
-	struct pollfd		newPoll;
+	struct sockaddr_in	serverAdress = {};
+	struct pollfd		newPoll = {};
 
 	serverAdress.sin_family = AF_INET;
 	serverAdress.sin_port = htons(_port);
@@ -313,12 +313,13 @@ void	Server::serverSocket()
 void	Server::serverInit()
 {
 	serverSocket();
-	while (Server::_signal == false)
+	while (!Server::_signal)
 	{
-		if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
+		if ((poll(&_fds[0], _fds.size(), -1) == -1) && !Server::_signal)
 			throw (std::runtime_error("Error : poll() failed."));
 		for (size_t i = 0; i < _fds.size(); i++)
 		{
+			std::cout << "i : " << i << " fds size : " << _fds.size() << std::endl;
 			if (_fds[i].revents & POLLIN)
 			{
 				if (_fds[i].fd == _serverSocketFd)

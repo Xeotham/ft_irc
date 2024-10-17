@@ -47,7 +47,8 @@ std::string	Client::getSendMsg(const std::string &cmd, const std::string &data) 
 	return (msg);
 }
 
-int		Client::getFd() const {
+int		Client::getFd() const
+{
 	return (this->_fd);
 }
 void	Client::setNick(const std::string &nick)
