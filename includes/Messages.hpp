@@ -6,6 +6,7 @@
 
 # define MSG "PRIVMSG"
 # define JOIN "JOIN"
+# define PART "PART"
 
 class	Client;
 

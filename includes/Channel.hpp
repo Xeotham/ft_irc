@@ -2,10 +2,8 @@
 # define CHANNEL_HPP
 
 # include <Params.hpp>
-# include <Client.hpp>
 # include <map>
-
-class Client;
+# include <Client.hpp>
 
 class Channel {
 	public:
@@ -24,15 +22,17 @@ class Channel {
 		const std::string		&getName() const;
 		const std::string		&getPassword() const;
 	public:
-		static std::map<std::string, std::string>	splitChannels(const std::string &data);
-		static Channel	&getChannelByName(ChannelLst &lst, const std::string &name);
+		static std::map<std::string, std::string>	splitChannelsJoin(const std::string &data);
+		static std::map<std::string, std::string>	splitChannelsPart(const std::string &data);
+	static Channel	&getChannelByName(ChannelLst &lst, const std::string &name);
+		static bool		isUserInChannel(Channel &channel, const Client &user);
 	private:
 		Channel();
 	private:
 		std::string	_name;
 		std::string	_password;
-		UserLst		_users;
 		UserLst		_operators;
+		UserLst		_users;
 };
 
 #endif // CHANNEL_HPP

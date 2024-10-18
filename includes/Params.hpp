@@ -10,6 +10,7 @@
 # include <arpa/inet.h>
 # include <unistd.h>
 # include <vector>
+# include <map>
 # include <csignal>
 # include <limits>
 # include <cstring>
@@ -26,4 +27,4 @@ class Client;
 typedef std::vector<Client> UserLst;
 typedef std::vector<Channel> ChannelLst;
 
-#endif //PARAMS_H
+#endif //PARAMS_HPP

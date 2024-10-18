@@ -147,11 +147,15 @@ void	Server::privMsgCommand(int fd, std::string data)
 	Client &user = Client::getClientByFd(this->_clients, fd);
 	if (dest.find_first_of('#') != std::string::npos) {
 		Channel &chan = Channel::getChannelByName(this->_channels, dest);
-		for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-			if (it->getFd() != fd) {
-				std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << data << std::endl;
-				Messages::sendMsg(it->getFd(), data, user, MSG);
+		if (Channel::isUserInChannel(chan, user)) {
+			std::cout << "test" << std::endl;
+			for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+				if (it->getFd() != fd) {
+					std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << data << std::endl;
+					Messages::sendMsg(it->getFd(), data, user, MSG);
+				}
 			}
+			return ;
 		}
 	}
 	else {
@@ -161,9 +165,9 @@ void	Server::privMsgCommand(int fd, std::string data)
 				return ;
 			}
 		}
-		std::string err_message = "Error : user not found.\r\n";
-		send(fd, err_message.c_str(), err_message.size(), 0);
 	}
+	std::string err_message = "Error : user not found.\r\n";
+	send(fd, err_message.c_str(), err_message.size(), 0);
 }
 
 void	Server::joinOneChannel(Client &user, const std::pair<std::string, std::string> &data)
@@ -174,6 +178,7 @@ void	Server::joinOneChannel(Client &user, const std::pair<std::string, std::stri
 		if (!chan.getPassword().empty() && chan.getPassword() != data.second)
 			throw (std::invalid_argument("Error : wrong password."));
 		chan.addUser(user);
+		user.addChannel(chan.getName());
 	}
 	catch (std::exception &ex) {
 		if (std::string(ex.what()) == "Error : wrong password.")
@@ -183,6 +188,7 @@ void	Server::joinOneChannel(Client &user, const std::pair<std::string, std::stri
 			Channel chan(data.first, data.second);
 			std::cout << "When channel created " << chan.getName() << " & " << chan.getPassword() << std::endl;
 			chan.addUser(user);
+			user.addChannel(chan.getName());
 			this->_channels.push_back(chan);
 		}
 		catch (std::exception &e) {
@@ -195,7 +201,12 @@ void Server::joinCommand(int fd, std::string data) {
 	data.erase(0, 5);
 	data.resize(data.size() - 2);
 	Client &user = Client::getClientByFd(this->_clients, fd);
-	std::map<std::string, std::string>	channels = Channel::splitChannels(data);
+	if (data == "0") {
+		while (!user.getChannels().empty())
+			this->partCommand(user.getFd(), *user.getChannels().begin() + ": leaving");
+		return ;
+	}
+	std::map<std::string, std::string>	channels = Channel::splitChannelsJoin(data);
 	std::cout << user.getNick() << " try to join" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
 		try {
@@ -204,6 +215,28 @@ void Server::joinCommand(int fd, std::string data) {
 		}
 		catch (std::exception &e) {
 			std::cout << e.what() << std::endl;
+			std::string msg = e.what();
+			msg += "\r\n";
+			send(fd, msg.c_str(), msg.size(), 0);
+		}
+	}
+}
+
+void	Server::partCommand(int fd, std::string data)
+{
+	data.erase(0, 5);
+	data.resize(data.size() - 2);
+	Client &user = Client::getClientByFd(this->_clients, fd);
+	std::map<std::string, std::string>	channels = Channel::splitChannelsPart(data);
+	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
+		try {
+			std::cout << "Channel to part: " << it->first << ", with messages " << it->second << std::endl;
+			Channel &chan = Channel::getChannelByName(this->_channels, it->first);
+			user.removeChannel(chan.getName());
+			chan.removeUser(user);
+			Messages::sendMsg(fd, it->first + ": " + it->second, user, PART);
+		}
+		catch (std::exception &e) {
 			std::string msg = e.what();
 			msg += "\r\n";
 			send(fd, msg.c_str(), msg.size(), 0);
@@ -227,6 +260,8 @@ void	Server::checkData(int fd, std::string data)
 		joinCommand(fd, data);
 	if (data.find("bot") != std::string::npos || data.find("Bot") != std::string::npos)
 		Bot::botCommand(fd, data, _clients);
+	if (data.find("PART") != std::string::npos)
+		partCommand(fd, data);
 }
 
 void	Server::receiveNewData(int fd)

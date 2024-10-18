@@ -27,8 +27,8 @@ class Server
 		void		setNickCommand(int fd, std::string data);
 		void		setUserCommand(int fd, std::string data);
 		void		joinOneChannel(Client &user, const std::pair<std::string, std::string> &data);
-
 		void		joinCommand(int fd, std::string data);
+		void		partCommand(int fd, std::string data);
 		bool		passCheck(int fd, std::string data);
 
 		void		clearClients(int fd);

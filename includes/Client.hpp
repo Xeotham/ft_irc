@@ -18,23 +18,26 @@ class Client
 		void	setNick(const std::string &nick);
 		void	setUser(const std::string &user);
 		void	setPassword();
-		void	setBuffer(std::string buffer);
+		void	setBuffer(const std::string &buffer);
+		void	addChannel(const std::string &channel);
+		void	removeChannel(const std::string &channel);
 
-		int				getFd() const;
-		std::string		getIpAdd() const;
-		std::string		getNick() const;
-		std::string		getUser() const;
-		std::string		getBuffer() const;
-		bool			getPassword() const;
-		std::string		getSendMsg(const std::string &cmd, const std::string &data) const;
-		static Client	&getClientByFd(std::vector<Client> &lst, int fd);
+		int							getFd() const;
+		std::string					getIpAdd() const;
+		std::string					getNick() const;
+		std::string					getUser() const;
+		std::string					getBuffer() const;
+		bool						getPassword() const;
+		std::vector<std::string>	&getChannels();
+		static Client				&getClientByFd(std::vector<Client> &lst, int fd);
 	private:
-		int			_fd;
-		std::string	_ipAdd;
-		std::string	_nick;
-		std::string	_user;
-		std::string _buffer;
-		bool		_password;
+		int							_fd;
+		std::string					_ipAdd;
+		std::string					_nick;
+		std::string					_user;
+		std::string					_buffer;
+		bool						_password;
+		std::vector<std::string>	_channels;
 };
 
 #endif

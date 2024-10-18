@@ -1,4 +1,5 @@
 #include "Client.hpp"
+#include "Channel.hpp"
 
 Client::Client()
 {
@@ -20,6 +21,8 @@ Client::Client(const std::string &nick, const std::string &user)
 
 Client::Client(const Client &ref)
 {
+	this->_fd = ref._fd;
+	this->_password = ref._password;
 	*this = ref;
 }
 
@@ -32,7 +35,7 @@ Client	&Client::operator=(const Client &ref)
 	this->_nick = ref._nick;
 	this->_user = ref._user;
 	this->_password = ref._password;
-	return *this;
+	return (*this);
 }
 
 Client::~Client()
@@ -47,13 +50,6 @@ void	Client::setFd(int fd)
 void	Client::setIpAdd(const std::string &ip)
 {
 	this->_ipAdd = ip;
-}
-
-std::string	Client::getSendMsg(const std::string &cmd, const std::string &data) const
-{
-	std::string msg =  ":" + this->getNick() + "!" + this->getUser() + "@localhost " + cmd + " " + data + "\r\n";
-	std::cout << msg << std::endl;
-	return (msg);
 }
 
 int		Client::getFd() const {
@@ -74,9 +70,24 @@ void	Client::setPassword()
 	this->_password = true;
 }
 
-void	Client::setBuffer(std::string buffer)
+void	Client::setBuffer(const std::string &buffer)
 {
 	this->_buffer = buffer;
+}
+
+void	Client::addChannel(const std::string &channel)
+{
+	this->_channels.push_back(channel);
+}
+
+void	Client::removeChannel(const std::string &channel)
+{
+	for (std::vector<std::string>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++) {
+		if (*it == channel) {
+			this->_channels.erase(it);
+			break;
+		}
+	}
 }
 
 std::string	Client::getIpAdd() const
@@ -102,6 +113,11 @@ bool	Client::getPassword() const
 std::string	Client::getBuffer() const
 {
 	return this->_buffer;
+}
+
+std::vector<std::string>	&Client::getChannels()
+{
+	return (this->_channels);
 }
 
 Client	&Client::getClientByFd(std::vector<Client> &lst, int fd)

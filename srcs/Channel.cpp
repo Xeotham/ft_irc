@@ -57,12 +57,13 @@ void Channel::addUser(Client &user) {
 }
 
 void Channel::removeUser(const Client &user) {
-	UserLst::iterator it = this->_users.begin();
-	while (it != this->_users.end() && it->getFd() != user.getFd())
-		it++;
-	if (it == this->_users.end())
-		throw (std::invalid_argument("The user is not in the channel."));
-	this->_users.erase(it);
+	for (UserLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
+		if (it->getFd() == user.getFd()) {
+			this->_users.erase(it);
+			return ;
+		}
+	}
+	throw (std::invalid_argument("The user is not in the channel."));
 }
 
 std::vector<Client> &Channel::getUsers() {
@@ -76,14 +77,13 @@ const std::string &Channel::getPassword() const {
 Channel &Channel::getChannelByName(std::vector<Channel> &lst, const std::string &name) {
 	for (ChannelLst::iterator it = lst.begin(); it != lst.end(); it++) {
 		if (it->getName() == name) {
-			std::cout << it->getName() << " & " << it->getPassword() << std::endl;
 			return (*it);
 		}
 	}
 	throw (std::invalid_argument("Channel not found."));
 }
 
-std::map<std::string, std::string>	Channel::splitChannels(const std::string &data) {
+std::map<std::string, std::string>	Channel::splitChannelsJoin(const std::string &data) {
 	std::map<std::string, std::string>	channels_mdp;
 	std::vector<std::string>			channels;
 	std::stringstream					storage(data);
@@ -114,4 +114,45 @@ std::map<std::string, std::string>	Channel::splitChannels(const std::string &dat
 		}
 	}
 	return (channels_mdp);
+}
+
+std::map<std::string, std::string>	Channel::splitChannelsPart(const std::string &data) {
+	std::map<std::string, std::string>	channels_mdp;
+	std::vector<std::string>			channels;
+	std::stringstream					storage(data);
+	std::string							segment;
+	std::vector<std::string>::iterator	iter;
+
+	while (std::getline(storage, segment, ' ')) {
+		channels.push_back(segment);
+	}
+	for (iter = channels.begin(); iter != channels.end(); iter++) {
+		if (iter->at(0) == '#')
+			continue ;
+		break ;
+	}
+	if (iter == channels.begin()) {
+		channels_mdp.insert(std::make_pair("invalid", ""));
+		return (channels_mdp);
+	}
+	for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
+		if (it->at(0) != '#')
+			break ;
+		if (iter == channels.end()) {
+			channels_mdp.insert(std::make_pair(*it, ""));
+		}
+		else {
+			channels_mdp.insert(std::make_pair(*it, iter->substr(1, iter->size() - 1)));
+			iter++;
+		}
+	}
+	return (channels_mdp);
+}
+
+bool	Channel::isUserInChannel(Channel &channel, const Client &user) {
+	for (UserLst::const_iterator it = channel.getUsers().begin(); it != channel.getUsers().end(); it++) {
+		if (it->getFd() == user.getFd())
+			return (true);
+	}
+	return (false);
 }

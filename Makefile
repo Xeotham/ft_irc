@@ -1,11 +1,13 @@
 NAME = ircserv
 
 SRCS = 	main.cpp \
-		Server.cpp \
+		Bot.cpp \
 		Client.cpp \
+		Server.cpp \
+		JoinCmd.cpp \
 		Channel.cpp \
-		Messages.cpp \
-		Bot.cpp
+		ACommand.cpp \
+		Messages.cpp
 
 SRCS_DIR = srcs/
 OBJS_DIR = obj/
