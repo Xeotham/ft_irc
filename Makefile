@@ -4,9 +4,9 @@ SRCS = 	main.cpp \
 		Bot.cpp \
 		Client.cpp \
 		Server.cpp \
-		JoinCmd.cpp \
 		Channel.cpp \
-		ACommand.cpp \
+		cmd/JoinCmd.cpp \
+		cmd/ACommand.cpp \
 		Messages.cpp
 
 SRCS_DIR = srcs/

@@ -1,4 +1,5 @@
 #include "Server.hpp"
+#include <JoinCmd.hpp>
 
 bool Server::_signal = false;
 
@@ -170,58 +171,6 @@ void	Server::privMsgCommand(int fd, std::string data)
 	send(fd, err_message.c_str(), err_message.size(), 0);
 }
 
-void	Server::joinOneChannel(Client &user, const std::pair<std::string, std::string> &data)
-{
-	try {
-		Channel &chan = Channel::getChannelByName(this->_channels, data.first);
-		std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
-		if (!chan.getPassword().empty() && chan.getPassword() != data.second)
-			throw (std::invalid_argument("Error : wrong password."));
-		chan.addUser(user);
-		user.addChannel(chan.getName());
-	}
-	catch (std::exception &ex) {
-		if (std::string(ex.what()) == "Error : wrong password.")
-			throw (std::invalid_argument("Error : wrong password to join " + data.first + "."));
-		try {
-			std::cout << "When creating Channel " << data.first << " & " << data.second << std::endl;
-			Channel chan(data.first, data.second);
-			std::cout << "When channel created " << chan.getName() << " & " << chan.getPassword() << std::endl;
-			chan.addUser(user);
-			user.addChannel(chan.getName());
-			this->_channels.push_back(chan);
-		}
-		catch (std::exception &e) {
-			throw (std::invalid_argument(e.what()));
-		}
-	}
-}
-
-void Server::joinCommand(int fd, std::string data) {
-	data.erase(0, 5);
-	data.resize(data.size() - 2);
-	Client &user = Client::getClientByFd(this->_clients, fd);
-	if (data == "0") {
-		while (!user.getChannels().empty())
-			this->partCommand(user.getFd(), *user.getChannels().begin() + ": leaving");
-		return ;
-	}
-	std::map<std::string, std::string>	channels = Channel::splitChannelsJoin(data);
-	std::cout << user.getNick() << " try to join" << std::endl;
-	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
-		try {
-			this->joinOneChannel(user, *it);
-			Messages::sendMsg(fd, it->first, user, JOIN);
-		}
-		catch (std::exception &e) {
-			std::cout << e.what() << std::endl;
-			std::string msg = e.what();
-			msg += "\r\n";
-			send(fd, msg.c_str(), msg.size(), 0);
-		}
-	}
-}
-
 void	Server::partCommand(int fd, std::string data)
 {
 	data.erase(0, 5);
@@ -256,8 +205,12 @@ void	Server::checkData(int fd, std::string data)
 		setNickCommand(fd, data);
 	if (data.find("USER") != std::string::npos)
 		setUserCommand(fd, data);
-	if (data.find("JOIN") != std::string::npos)
-		joinCommand(fd, data);
+	if (data.find("JOIN") != std::string::npos) {
+		JoinCmd	cmd;
+		data.erase(0, 5);
+		data.resize(data.size() - 2);
+		cmd.execute(fd, data, this->_channels, this->_clients);
+	}
 	if (data.find("bot") != std::string::npos || data.find("Bot") != std::string::npos)
 		Bot::botCommand(fd, data, _clients);
 	if (data.find("PART") != std::string::npos)
