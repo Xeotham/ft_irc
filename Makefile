@@ -9,8 +9,7 @@ SRCS = 	main.cpp \
 		cmd/JoinCmd.cpp \
 		cmd/PartCmd.cpp \
 		cmd/ACommand.cpp \
-		cmd/PrivMsgCmd.cpp \
-		cmd/NickCmd.cpp
+		cmd/PrivMsgCmd.cpp
 SRCS_DIR = srcs/
 OBJS_DIR = obj/
 INCLUDE_DIR = includes/

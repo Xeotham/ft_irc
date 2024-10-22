@@ -8,6 +8,7 @@
 # define JOIN "JOIN"
 # define PART "PART"
 # define NICK "NICK"
+# define USER "USER"
 
 class	Client;
 

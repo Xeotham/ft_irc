@@ -116,33 +116,33 @@ void	Server::setUserCommand(int fd, std::string data)
 	}
 }
 
-// void	Server::setNickCommand(int fd, std::string data)
-// {
-// 	size_t pos = data.find("NICK");
-// 	data.erase(0, pos + 5);
-// 	size_t pos2 = data.find("\r\n");
-// 	for (size_t i = 0; i < _clients.size(); i++)
-// 	{
-// 		if (_clients[i].getNick() == data.substr(0, pos2))
-// 		{
-// 			std::string message = "Error : nickname already used.\r\n";
-// 			send(fd, message.c_str(), message.size(), 0);
-// 			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
-// 			close(fd);
-// 			clearClients(fd);
-// 			return ;
-// 		}
-// 	}
-// 	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++)
-// 	{
-// 		if (it->getFd() == fd)
-// 		{
-// 			it->setNick(data.substr(0, pos2));
-// 			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
-// 		}
-// 	}
-// 	return ;
-// }
+void	Server::setNickCommand(int fd, std::string data)
+{
+	size_t pos = data.find("NICK");
+	data.erase(0, pos + 5);
+	size_t pos2 = data.find("\r\n");
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i].getNick() == data.substr(0, pos2))
+		{
+			std::string message = "Error : nickname already used.\r\n";
+			send(fd, message.c_str(), message.size(), 0);
+			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
+			close(fd);
+			clearClients(fd);
+			return ;
+		}
+	}
+	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++)
+	{
+		if (it->getFd() == fd)
+		{
+			it->setNick(data.substr(0, pos2));
+			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
+		}
+	}
+	return ;
+}
 
 void	Server::checkData(int fd, std::string data)
 {
@@ -157,10 +157,11 @@ void	Server::checkData(int fd, std::string data)
 	if (data.find("QUIT") != std::string::npos)
 		return ;
 	if (data.find("NICK") != std::string::npos) {
-		NickCmd    cmd;
-		data.erase(0, 5);
-		data.resize(data.size() - 2);
-		cmd.execute(fd, data, this->_channels, this->_clients);
+		setNickCommand(fd, data.substr(5, data.size() - 2));
+		// NickCmd    cmd;
+		// data.erase(0, 5);
+		// data.resize(data.size() - 2);
+		// cmd.execute(fd, data, this->_channels, this->_clients);
 	}
 	if (data.find("USER") != std::string::npos)
 		setUserCommand(fd, data);
@@ -178,7 +179,6 @@ void	Server::checkData(int fd, std::string data)
 		data.resize(data.size() - 2);
 		cmd.execute(fd, data, this->_channels, this->_clients);
 	}
-	// partCommand(fd, data);
 }
 
 void	Server::receiveNewData(int fd)

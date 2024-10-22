@@ -13,7 +13,6 @@ class NickCmd : public ACommand
 		NickCmd &operator=(const NickCmd &other);
 	public:
 		void	execute(int fd, const std::string &data, ChannelLst &chan_lst, UserLst &user_lst);
-
 };
 
 #endif //NICKCMD_H

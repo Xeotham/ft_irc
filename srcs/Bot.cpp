@@ -39,12 +39,9 @@ void    Bot::botCommand(int fd, std::string data, std::vector<Client> &vec)
 	Client &user = Client::getClientByFd(vec, fd);
 	std::string cmd[] = {"cmd\r\n", "joke\r\n", "ping\r\n"};
 	t_func func[] = {&Bot::sendCommand, &Bot::sendJoke, &Bot::sendPong};
-	if (data.find("PRIVMSG") != std::string::npos)
-		pos = data.find(':');
-	else
-		pos = data.find(' ');
+	pos = data.find(' ');
 	data.erase(0, pos + 1);
-
+	std::cout << data << std::endl;
 	while(i < 3 && cmd[i].compare(data))
 		i++;
 	if (i < 3)

@@ -44,7 +44,8 @@ void    PrivMsgCmd::sendMsgToBot(int fd, const std::string &data, UserLst &user_
 {
     std::string cmd = data;
     cmd.erase(0, data.find(' ') + 2);
-    cmd = "bot " + cmd;
+    cmd = "bot " + cmd + "\r\n";
+	std::cout << cmd << std::endl;
     Bot::botCommand(fd, cmd, user_lst);
 }
 
@@ -54,8 +55,9 @@ void	PrivMsgCmd::execute(int fd, const std::string &data, ChannelLst &chan_lst, 
 	Client &user = Client::getClientByFd(user_lst, fd);
 	if (dest.find_first_of('#') != std::string::npos)
 		this->sendMsgToChannel(user, data, dest, chan_lst);
-    else if (dest == "Bot")
+    else if (dest == "Bot") {
     	this->sendMsgToBot(fd, data, user_lst);
+    }
 	else if (Client::isClientInList(user_lst, dest))
 		this->sendMsgToUser(user, data, dest, user_lst);
     else {

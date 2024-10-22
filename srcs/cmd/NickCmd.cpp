@@ -1,5 +1,4 @@
 #include <NickCmd.hpp>
-#include <pstl/glue_execution_defs.h>
 
 
 NickCmd::NickCmd() {}
