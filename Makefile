@@ -5,16 +5,17 @@ SRCS = 	main.cpp \
 		Client.cpp \
 		Server.cpp \
 		Channel.cpp \
+		Messages.cpp \
 		cmd/JoinCmd.cpp \
+		cmd/PartCmd.cpp \
 		cmd/ACommand.cpp \
 		cmd/PrivMsgCmd.cpp \
-		Messages.cpp
-
+		cmd/NickCmd.cpp
 SRCS_DIR = srcs/
 OBJS_DIR = obj/
 INCLUDE_DIR = includes/
 
-OBJS = $(addprefix $(OBJS_DIR),$(SRCS:.cpp=.o))
+OBJS = $(addprefix $(OBJS_DIR), $(SRCS:.cpp=.o))
 
 CC = c++
 LDFLAGS = $(LIBS)

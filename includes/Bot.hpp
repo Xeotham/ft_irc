@@ -1,7 +1,7 @@
 #ifndef BOT_HPP
 # define BOT_HPP
 
-# include <Params.hpp>
+# include "Params.hpp"
 # include "Client.hpp"
 # include "Server.hpp"
 # include <netdb.h>

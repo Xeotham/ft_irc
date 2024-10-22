@@ -1,12 +1,13 @@
 #ifndef MESSAGES_HPP
 # define MESSAGES_HPP
 
-# include <Params.hpp>
-# include <Client.hpp>
+# include "Params.hpp"
+# include "Client.hpp"
 
 # define MSG "PRIVMSG"
 # define JOIN "JOIN"
 # define PART "PART"
+# define NICK "NICK"
 
 class	Client;
 

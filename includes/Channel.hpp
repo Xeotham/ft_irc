@@ -22,8 +22,6 @@ class Channel {
 		const std::string		&getName() const;
 		const std::string		&getPassword() const;
 	public:
-		static std::map<std::string, std::string>	splitChannelsJoin(const std::string &data);
-		static std::map<std::string, std::string>	splitChannelsPart(const std::string &data);
 		static Channel	&getChannelByName(ChannelLst &lst, const std::string &name);
 		static bool		isUserInChannel(Channel &channel, const Client &user);
 	private:

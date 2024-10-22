@@ -1,7 +1,7 @@
 #ifndef PRIVMSGCMD_HPP
 # define PRIVMSGCMD_HPP
 
-# include <ACommand.hpp>
+# include "ACommand.hpp"
 
 class PrivMsgCmd : public ACommand {
 	public:

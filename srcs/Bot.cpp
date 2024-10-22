@@ -1,5 +1,4 @@
-#include "Bot.hpp"
-#include "../includes/Bot.hpp"
+#include <Bot.hpp>
 
 Bot::Bot() {}
 Bot::Bot(const Bot& other) {(void)other;}

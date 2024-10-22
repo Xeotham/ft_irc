@@ -1,7 +1,7 @@
-#ifndef ACOMMAND_H
-# define ACOMMAND_H
+#ifndef ACOMMAND_HPP
+# define ACOMMAND_HPP
 
-# include <Params.hpp>
+# include "Params.hpp"
 
 class ACommand {
 	public:
@@ -16,4 +16,4 @@ class ACommand {
 
 
 
-#endif //ACOMMAND_H
+#endif

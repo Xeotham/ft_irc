@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-# include <Params.hpp>
+# include "Params.hpp"
 # include "Client.hpp"
 # include "Bot.hpp"
 # include "Channel.hpp"
@@ -23,12 +23,8 @@ class Server
 		void		receiveNewData(int fd);
 		void		checkData(int fd, std::string data);
 
-		void		privMsgCommand(int fd, std::string data);
 		void		setNickCommand(int fd, std::string data);
 		void		setUserCommand(int fd, std::string data);
-		void		joinOneChannel(Client &user, const std::pair<std::string, std::string> &data);
-		void		joinCommand(int fd, std::string data);
-		void		partCommand(int fd, std::string data);
 		bool		passCheck(int fd, std::string data);
 
 		void		clearClients(int fd);

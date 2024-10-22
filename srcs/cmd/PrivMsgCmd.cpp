@@ -2,18 +2,13 @@
 #include <Channel.hpp>
 #include <Bot.hpp>
 
-PrivMsgCmd::PrivMsgCmd()
-{
-}
+PrivMsgCmd::PrivMsgCmd() {}
 
-PrivMsgCmd::PrivMsgCmd(const PrivMsgCmd &other)
-{
+PrivMsgCmd::PrivMsgCmd(const PrivMsgCmd &other) : ACommand(other) {
 	*this = other;
 }
 
-PrivMsgCmd::~PrivMsgCmd()
-{
-}
+PrivMsgCmd::~PrivMsgCmd() {}
 
 PrivMsgCmd &PrivMsgCmd::operator=(const PrivMsgCmd &other)
 {

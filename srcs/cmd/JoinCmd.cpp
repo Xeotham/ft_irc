@@ -106,4 +106,3 @@ std::map<std::string, std::string>	JoinCmd::splitData(const std::string &data) {
 	}
 	return (channels_mdp);
 }
-

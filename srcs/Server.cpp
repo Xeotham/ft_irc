@@ -1,6 +1,9 @@
-#include "Server.hpp"
+#include <Server.hpp>
 #include <JoinCmd.hpp>
 #include <PrivMsgCmd.hpp>
+#include <PartCmd.hpp>
+
+#include "NickCmd.hpp"
 
 bool Server::_signal = false;
 
@@ -111,58 +114,35 @@ void	Server::setUserCommand(int fd, std::string data)
 			std::cout << "Client <" << fd << "> set username to : " << it->getUser() << std::endl;
 		}
 	}
-	return ;
 }
 
-void	Server::setNickCommand(int fd, std::string data)
-{
-	size_t pos = data.find("NICK");
-	data.erase(0, pos + 5);
-	size_t pos2 = data.find("\r\n");
-	for (size_t i = 0; i < _clients.size(); i++)
-	{
-		if (_clients[i].getNick() == data.substr(0, pos2))
-		{
-			std::string message = "Error : nickname already used.\r\n";
-			send(fd, message.c_str(), message.size(), 0);
-			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
-			close(fd);
-			clearClients(fd);
-			return ;
-		}
-	}
-	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->getFd() == fd)
-		{
-			it->setNick(data.substr(0, pos2));
-			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
-		}
-	}
-	return ;
-}
-
-void	Server::partCommand(int fd, std::string data)
-{
-	data.erase(0, 5);
-	data.resize(data.size() - 2);
-	Client &user = Client::getClientByFd(this->_clients, fd);
-	std::map<std::string, std::string>	channels = Channel::splitChannelsPart(data);
-	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
-		try {
-			std::cout << "Channel to part: " << it->first << ", with messages " << it->second << std::endl;
-			Channel &chan = Channel::getChannelByName(this->_channels, it->first);
-			user.removeChannel(chan.getName());
-			chan.removeUser(user);
-			Messages::sendMsg(fd, it->first + ": " + it->second, user, PART);
-		}
-		catch (std::exception &e) {
-			std::string msg = e.what();
-			msg += "\r\n";
-			send(fd, msg.c_str(), msg.size(), 0);
-		}
-	}
-}
+// void	Server::setNickCommand(int fd, std::string data)
+// {
+// 	size_t pos = data.find("NICK");
+// 	data.erase(0, pos + 5);
+// 	size_t pos2 = data.find("\r\n");
+// 	for (size_t i = 0; i < _clients.size(); i++)
+// 	{
+// 		if (_clients[i].getNick() == data.substr(0, pos2))
+// 		{
+// 			std::string message = "Error : nickname already used.\r\n";
+// 			send(fd, message.c_str(), message.size(), 0);
+// 			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
+// 			close(fd);
+// 			clearClients(fd);
+// 			return ;
+// 		}
+// 	}
+// 	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++)
+// 	{
+// 		if (it->getFd() == fd)
+// 		{
+// 			it->setNick(data.substr(0, pos2));
+// 			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
+// 		}
+// 	}
+// 	return ;
+// }
 
 void	Server::checkData(int fd, std::string data)
 {
@@ -171,12 +151,17 @@ void	Server::checkData(int fd, std::string data)
 	if (data.find("PRIVMSG") != std::string::npos) {
 		PrivMsgCmd	cmd;
 		data.erase(0, 8);
+		data.resize(data.size() - 2);
 		cmd.execute(fd, data, this->_channels, this->_clients);
 	}
 	if (data.find("QUIT") != std::string::npos)
 		return ;
-	if (data.find("NICK") != std::string::npos)
-		setNickCommand(fd, data);
+	if (data.find("NICK") != std::string::npos) {
+		NickCmd    cmd;
+		data.erase(0, 5);
+		data.resize(data.size() - 2);
+		cmd.execute(fd, data, this->_channels, this->_clients);
+	}
 	if (data.find("USER") != std::string::npos)
 		setUserCommand(fd, data);
 	if (data.find("JOIN") != std::string::npos) {
@@ -187,8 +172,13 @@ void	Server::checkData(int fd, std::string data)
 	}
 	if (data.find("bot") != std::string::npos)
 		Bot::botCommand(fd, data, _clients);
-	if (data.find("PART") != std::string::npos)
-		partCommand(fd, data);
+	if (data.find("PART") != std::string::npos) {
+		PartCmd	cmd;
+		data.erase(0, 5);
+		data.resize(data.size() - 2);
+		cmd.execute(fd, data, this->_channels, this->_clients);
+	}
+	// partCommand(fd, data);
 }
 
 void	Server::receiveNewData(int fd)
