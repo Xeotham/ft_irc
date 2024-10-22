@@ -7,6 +7,7 @@ SRCS = 	main.cpp \
 		Channel.cpp \
 		cmd/JoinCmd.cpp \
 		cmd/ACommand.cpp \
+		cmd/PrivMsgCmd.cpp \
 		Messages.cpp
 
 SRCS_DIR = srcs/

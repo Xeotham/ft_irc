@@ -30,6 +30,7 @@ class Client
 		bool						getPassword() const;
 		std::vector<std::string>	&getChannels();
 		static Client				&getClientByFd(std::vector<Client> &lst, int fd);
+		static bool					isClientInList(std::vector<Client> &lst, const std::string &nick);
 	private:
 		int							_fd;
 		std::string					_ipAdd;

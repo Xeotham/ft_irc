@@ -1,5 +1,6 @@
 #include "Server.hpp"
 #include <JoinCmd.hpp>
+#include <PrivMsgCmd.hpp>
 
 bool Server::_signal = false;
 
@@ -141,36 +142,6 @@ void	Server::setNickCommand(int fd, std::string data)
 	return ;
 }
 
-void	Server::privMsgCommand(int fd, std::string data)
-{
-	data.erase(0, 8);
-	std::string dest = data.substr(0, data.find(' '));
-	Client &user = Client::getClientByFd(this->_clients, fd);
-	if (dest.find_first_of('#') != std::string::npos) {
-		Channel &chan = Channel::getChannelByName(this->_channels, dest);
-		if (Channel::isUserInChannel(chan, user)) {
-			std::cout << "test" << std::endl;
-			for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-				if (it->getFd() != fd) {
-					std::cout << "Client <" << fd << "> send message to <" << it->getNick() << "> : " << data << std::endl;
-					Messages::sendMsg(it->getFd(), data, user, MSG);
-				}
-			}
-			return ;
-		}
-	}
-	else {
-		for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++) {
-			if (it->getNick() == dest) {
-				Messages::sendMsg(it->getFd(), data, user, MSG);
-				return ;
-			}
-		}
-	}
-	std::string err_message = "Error : user not found.\r\n";
-	send(fd, err_message.c_str(), err_message.size(), 0);
-}
-
 void	Server::partCommand(int fd, std::string data)
 {
 	data.erase(0, 5);
@@ -197,8 +168,11 @@ void	Server::checkData(int fd, std::string data)
 {
 	if (!passCheck(fd, data))
 		return ;
-	if (data.find("PRIVMSG") != std::string::npos && data.find("PRIVMSG Bot :") != 0)
-		privMsgCommand(fd, data);
+	if (data.find("PRIVMSG") != std::string::npos) {
+		PrivMsgCmd	cmd;
+		data.erase(0, 8);
+		cmd.execute(fd, data, this->_channels, this->_clients);
+	}
 	if (data.find("QUIT") != std::string::npos)
 		return ;
 	if (data.find("NICK") != std::string::npos)
@@ -211,7 +185,7 @@ void	Server::checkData(int fd, std::string data)
 		data.resize(data.size() - 2);
 		cmd.execute(fd, data, this->_channels, this->_clients);
 	}
-	if (data.find("bot") != std::string::npos || data.find("Bot") != std::string::npos)
+	if (data.find("bot") != std::string::npos)
 		Bot::botCommand(fd, data, _clients);
 	if (data.find("PART") != std::string::npos)
 		partCommand(fd, data);

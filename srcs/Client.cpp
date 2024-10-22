@@ -129,3 +129,12 @@ Client	&Client::getClientByFd(std::vector<Client> &lst, int fd)
 	}
 	throw (std::invalid_argument("Client not found."));
 }
+
+bool	Client::isClientInList(UserLst &lst, const std::string &nick)
+{
+	for (UserLst::iterator it = lst.begin(); it != lst.end(); it++) {
+		if (it->getNick() == nick)
+			return (true);
+	}
+	return (false);
+}
