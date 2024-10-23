@@ -5,24 +5,25 @@
 # include "Client.hpp"
 # include "Server.hpp"
 # include <netdb.h>
+# include "ACommand.hpp"
 
 # define BOT Client("Bot", "Bot")
 
-class Bot
+class Bot : public ACommand
 {
 private:
 	Bot();
 	Bot(const Bot& other);
 	Bot& operator=(const Bot& other);
 
-	~Bot();
-	static void		sendCommand(int fd, Client &user);
-	static void		sendJoke(int fd, Client &user);
-	static void		sendPong(int fd, Client &user);
+	void		sendCommand(int fd, Client &user);
+	void		sendJoke(int fd, Client &user);
+	void		sendPong(int fd, Client &user);
 
 public:
-	static void    botCommand(int fd, std::string data, std::vector<Client> &vec);
-
+	Bot(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+	~Bot();
+	void    execute(int fd);
 };
 
 typedef void (*t_func)(int, Client &);

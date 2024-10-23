@@ -44,11 +44,10 @@ void	PrivMsgCmd::sendMsgToUser(Client &user, const std::string &dest)
 
 void    PrivMsgCmd::sendMsgToBot(int fd)
 {
-    std::string cmd = _data;
-    cmd.erase(0, _data.find(' ') + 2);
-    cmd = "bot " + cmd + "\r\n";
-	std::cout << cmd << std::endl;
-    Bot::botCommand(fd, cmd, *_user_lst);
+	std::string cmd = _data.substr(5);
+	Bot			bot(*_user_lst, *_chan_lst, cmd);
+
+    bot.execute(fd);
 }
 
 void	PrivMsgCmd::execute(int fd)

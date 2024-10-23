@@ -5,6 +5,9 @@ Bot::Bot(const Bot& other) {(void)other;}
 Bot& Bot::operator=(const Bot& other) {(void)other;	return *this;}
 Bot::~Bot() {}
 
+Bot::Bot(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data){}
+
+
 void    Bot::sendCommand(int fd, Client &user)
 {
 	std::string message = ".\r\n";
@@ -32,18 +35,24 @@ void    Bot::sendPong(int fd, Client &user)
 	Messages::sendMsg(fd, user.getNick() + " pong", BOT, MSG);
 }
 
-void    Bot::botCommand(int fd, std::string data, std::vector<Client> &vec)
+void    Bot::execute(int fd)
 {
 	int i = 0;
-	size_t pos = 0;
-	Client &user = Client::getClientByFd(vec, fd);
-	std::string cmd[] = {"cmd\r\n", "joke\r\n", "ping\r\n"};
-	t_func func[] = {&Bot::sendCommand, &Bot::sendJoke, &Bot::sendPong};
-	pos = data.find(' ');
-	data.erase(0, pos + 1);
-	std::cout << data << std::endl;
-	while(i < 3 && cmd[i].compare(data))
+	// size_t pos = 0;
+	Client &user = Client::getClientByFd(*_user_lst, fd);
+	std::string cmd[] = {"cmd", "joke", "ping"};
+	std::cout << _data << std::endl;
+	while(i < 3 && cmd[i].compare(_data))
 		i++;
-	if (i < 3)
-		(*func[i])(fd, user);
+	switch (i) {
+		case 0:
+			sendCommand(fd, user);
+			break;
+		case 1:
+			sendJoke(fd, user);
+			break;
+		case 2:
+			sendPong(fd, user);
+			break;
+	}
 }
