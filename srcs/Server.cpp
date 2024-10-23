@@ -1,6 +1,6 @@
 #include <Server.hpp>
 #include <JoinCmd.hpp>
-#include <PrivMsgCmd.hpp>
+// #include <PrivMsgCmd.hpp>
 #include <PartCmd.hpp>
 
 #include "NickCmd.hpp"
@@ -103,7 +103,7 @@ bool	Server::passCheck(int fd, std::string data)
 
 bool	Server::checkData(int fd, const std::string &data)
 {
-	ACommand							*cmd = __nullptr;
+	ACommand							*cmd = NULL;
 	std::stringstream					storage(data);
 	std::string							segment;
 	if (!passCheck(fd, data))

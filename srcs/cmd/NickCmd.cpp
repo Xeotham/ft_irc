@@ -17,7 +17,7 @@ NickCmd &NickCmd::operator=(const NickCmd &other) {
 
 void NickCmd::execute(int fd)
 {
-	Client	*user = __nullptr;
+	Client	*user = NULL;
 	try {
 		user = &Client::getClientByFd(*_user_lst, fd);
 	}

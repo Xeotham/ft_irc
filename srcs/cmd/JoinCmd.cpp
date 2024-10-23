@@ -9,7 +9,7 @@ JoinCmd::JoinCmd(const JoinCmd &other) : ACommand(other) {
 
 JoinCmd::JoinCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data) {}
 
-JoinCmd::~JoinCmd() {}
+JoinCmd::~JoinCmd(){}
 
 JoinCmd &JoinCmd::operator=(const JoinCmd &other) {
 	if (this == &other)
@@ -35,7 +35,6 @@ void	JoinCmd::createJoinChannel(Client &user, const std::pair<std::string, std::
 	_chan_lst->push_back(chan);
 }
 
-
 void	JoinCmd::joinOneChannel(Client &user, const std::pair<std::string, std::string> &data)
 {
 	try {
@@ -52,7 +51,6 @@ void	JoinCmd::joinOneChannel(Client &user, const std::pair<std::string, std::str
 		}
 	}
 }
-
 
 void JoinCmd::execute(int fd) {
 	Client &user = Client::getClientByFd(*_user_lst, fd);
