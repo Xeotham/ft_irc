@@ -3,18 +3,18 @@
 
 # include "ACommand.hpp"
 
-
 class UserCmd : public ACommand
 {
 	public:
-		UserCmd();
+		UserCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		UserCmd(const UserCmd &other);
 		~UserCmd();
 	public:
 		UserCmd	&operator=(const UserCmd &other);
 	public:
-		void	execute(int fd, const std::string &data, ChannelLst &chan_lst, UserLst &user_lst);
-
+		void	execute(int fd);
+	private:
+		UserCmd();
 };
 
 #endif

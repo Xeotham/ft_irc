@@ -21,7 +21,7 @@ class Server
 
 		void		acceptNewClient();
 		void		receiveNewData(int fd);
-		void		checkData(int fd, std::string data);
+		void		checkData(int fd, const std::string &data);
 
 		void		setNickCommand(int fd, std::string data);
 		void		setUserCommand(int fd, std::string data);

@@ -144,41 +144,56 @@ void	Server::setNickCommand(int fd, std::string data)
 	return ;
 }
 
-void	Server::checkData(int fd, std::string data)
+void	Server::checkData(int fd, const std::string &data)
 {
+	std::stringstream					storage(data);
+	std::string							segment;
 	if (!passCheck(fd, data))
 		return ;
-	if (data.find("PRIVMSG") != std::string::npos) {
-		PrivMsgCmd	cmd;
-		data.erase(0, 8);
-		data.resize(data.size() - 2);
-		cmd.execute(fd, data, this->_channels, this->_clients);
+	while (std::getline(storage, segment, '\n') && !segment.empty()) {
+
+		if (segment.find('\r') != std::string::npos)
+			segment.resize(segment.size() - 1);
+		try {
+			ACommand	*cmd = 	ACommand::cmdSelector(this->_clients, this->_channels, segment);
+			cmd->execute(fd);
+			delete cmd;
+		}
+		catch (std::exception &e) {
+			std::cerr << e.what() << std::endl;
+		}
 	}
-	if (data.find("QUIT") != std::string::npos)
-		return ;
-	if (data.find("NICK") != std::string::npos) {
-		setNickCommand(fd, data.substr(5, data.size() - 2));
-		// NickCmd    cmd;
-		// data.erase(0, 5);
-		// data.resize(data.size() - 2);
-		// cmd.execute(fd, data, this->_channels, this->_clients);
-	}
-	if (data.find("USER") != std::string::npos)
-		setUserCommand(fd, data);
-	if (data.find("JOIN") != std::string::npos) {
-		JoinCmd	cmd;
-		data.erase(0, 5);
-		data.resize(data.size() - 2);
-		cmd.execute(fd, data, this->_channels, this->_clients);
-	}
-	if (data.find("bot") != std::string::npos)
-		Bot::botCommand(fd, data, _clients);
-	if (data.find("PART") != std::string::npos) {
-		PartCmd	cmd;
-		data.erase(0, 5);
-		data.resize(data.size() - 2);
-		cmd.execute(fd, data, this->_channels, this->_clients);
-	}
+	// if (data.find("PRIVMSG") != std::string::npos) {
+	// 	PrivMsgCmd	cmd;
+	// 	data.erase(0, 8);
+	// 	data.resize(data.size() - 2);
+	// 	cmd.execute(fd, data, this->_channels, this->_clients);
+	// }
+	// if (data.find("QUIT") != std::string::npos)
+	// 	return ;
+	// if (data.find("NICK") != std::string::npos) {
+	// 	// setNickCommand(fd, data.substr(5, data.size() - 2));
+	// 	NickCmd    cmd;
+	// 	data.erase(0, 5);
+	// 	data.resize(data.size() - 2);
+	// 	cmd.execute(fd, data, this->_channels, this->_clients);
+	// }
+	// if (data.find("USER") != std::string::npos)
+	// 	setUserCommand(fd, data);
+	// if (data.find("JOIN") != std::string::npos) {
+	// 	JoinCmd	cmd;
+	// 	data.erase(0, 5);
+	// 	data.resize(data.size() - 2);
+	// 	cmd.execute(fd, data, this->_channels, this->_clients);
+	// }
+	// if (data.find("bot") != std::string::npos)
+	// 	Bot::botCommand(fd, data, _clients);
+	// if (data.find("PART") != std::string::npos) {
+	// 	PartCmd	cmd;
+	// 	data.erase(0, 5);
+	// 	data.resize(data.size() - 2);
+	// 	cmd.execute(fd, data, this->_channels, this->_clients);
+	// }
 }
 
 void	Server::receiveNewData(int fd)

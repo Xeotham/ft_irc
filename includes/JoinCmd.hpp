@@ -7,18 +7,20 @@
 class JoinCmd : public ACommand
 {
 	public:
-		JoinCmd();
+		JoinCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		JoinCmd(const JoinCmd &other);
 		virtual ~JoinCmd();
 	public:
         JoinCmd &operator=(const JoinCmd &other);
     public:
-		void execute(int fd, const std::string &data, ChannelLst &chan_lst, UserLst &user_lst);
+		void execute(int fd);
 	private:
-		void	createJoinChannel(Client &user, const std::pair<std::string, std::string> &data, ChannelLst &chan_lst);
-		void	joinChannel(Client &user, const std::pair<std::string, std::string> &data, ChannelLst &chan_lst);
-		void	joinOneChannel(Client &user, const std::pair<std::string, std::string> &data, ChannelLst &chan_lst);
-		std::map<std::string, std::string> splitData(const std::string &data);
+		JoinCmd();
+	private:
+		void	createJoinChannel(Client &user, const std::pair<std::string, std::string> &data);
+		void	joinChannel(Client &user, const std::pair<std::string, std::string> &data);
+		void	joinOneChannel(Client &user, const std::pair<std::string, std::string> &data);
+		std::map<std::string, std::string> splitData();
 };
 
 #endif

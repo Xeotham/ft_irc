@@ -2,10 +2,9 @@
 
 UserCmd::UserCmd() {}
 
-UserCmd::UserCmd(const UserCmd &other)
-{
-	*this = other;
-}
+UserCmd::UserCmd(const UserCmd &other) : ACommand(other) {}
+
+UserCmd::UserCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data) {}
 
 UserCmd::~UserCmd() {}
 
@@ -16,12 +15,13 @@ UserCmd	&UserCmd::operator=(const UserCmd &other)
 	return *this;
 }
 
-void UserCmd::execute(int fd, const std::string &data, ChannelLst &chan_lst, UserLst &user_lst) {
+void UserCmd::execute(int fd) {
 	//	USER <username> <hostname> <servername> :<realname>
-	(void)chan_lst;
-	Client	&user = Client::getClientByFd(user_lst, fd);
+	Client		&user = Client::getClientByFd(*_user_lst, fd);
+	std::string	username = _data;
 
-	Messages::sendMsg(fd, data, user, USER);
-	user.setUser(data);
-	std::cout << "Client <" << fd << "> set username to : " << it->getUser() << std::endl;
+	username.erase(username.find_first_of(' '));
+	Messages::sendMsg(fd, username, user, USER);
+	user.setUser(username);
+	std::cout << "Client <" << fd << "> set username to : " << user.getUser() << std::endl;
 }

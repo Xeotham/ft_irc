@@ -3,9 +3,9 @@
 
 NickCmd::NickCmd() {}
 
-NickCmd::NickCmd(const NickCmd &other) : ACommand(other) {
-	*this = other;
-}
+NickCmd::NickCmd(const NickCmd &other) : ACommand(other) {}
+
+NickCmd::NickCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data) {}
 
 NickCmd::~NickCmd() {}
 
@@ -15,30 +15,29 @@ NickCmd &NickCmd::operator=(const NickCmd &other) {
 	return *this;
 }
 
-void NickCmd::execute(int fd, const std::string &data, ChannelLst &chan_lst, UserLst &user_lst)
+void NickCmd::execute(int fd)
 {
-	(void)chan_lst;
+	Client	*user = __nullptr;
 	try {
-		Client	&user = Client::getClientByFd(user_lst, fd);
+		user = &Client::getClientByFd(*_user_lst, fd);
 	}
 	catch (std::exception &e) {
-
 		std::cerr << e.what() << std::endl;
+		return ;
 	}
-
-	for (size_t i = 0; i < user_lst.size(); i++)
+	for (size_t i = 0; i < _user_lst->size(); i++)
 	{
-		if (user_lst[i].getNick() == data)
+		if ((*_user_lst)[i].getNick() == _data)
 		{
 			std::string message = "Error : nickname already used.\r\n";
 			send(fd, message.c_str(), message.size(), 0);
-			std::cout << "Client <" << user_lst[i].getFd() << "> disconnected." << std::endl;
+			std::cout << "Client <" << (*_user_lst)[i].getFd() << "> disconnected." << std::endl;
 			close(fd);
 			// clearClients(fd);
 			return ;
 		}
 	}
-	Messages::sendMsg(fd, data, user, NICK);
-	user.setNick(data);
-	std::cout << "Client <" << fd << "> set nickname to : " << user.getNick() << std::endl;
+	Messages::sendMsg(fd, _data, *user, NICK);
+	user->setNick(_data);
+	std::cout << "Client <" << fd << "> set nickname to : " << user->getNick() << std::endl;
 }

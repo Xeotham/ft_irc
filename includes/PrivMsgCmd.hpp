@@ -5,17 +5,19 @@
 
 class PrivMsgCmd : public ACommand {
 	public:
-		PrivMsgCmd();
 		PrivMsgCmd(const PrivMsgCmd &other);
+		PrivMsgCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		virtual ~PrivMsgCmd();
 	public:
 		PrivMsgCmd &operator=(const PrivMsgCmd &other);
 	public:
-		void execute(int fd, const std::string &data, ChannelLst &chan_lst, UserLst &user_lst);
+		void execute(int fd);
 	private:
-		void	sendMsgToChannel(Client &user, const std::string &msg, const std::string &channel, ChannelLst &chan_lst);
-        void	sendMsgToUser(Client &user, const std::string &data, const std::string &dest, UserLst &user_lst);
-		void	sendMsgToBot(int fd, const std::string &data, UserLst &user_lst);
+		PrivMsgCmd();
+	private:
+		void	sendMsgToChannel(Client &user, const std::string &channel);
+        void	sendMsgToUser(Client &user, const std::string &dest);
+		void	sendMsgToBot(int fd);
 };
 
 

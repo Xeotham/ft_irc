@@ -1,11 +1,11 @@
 #include <PartCmd.hpp>
 #include <Channel.hpp>
 
-PartCmd::PartCmd() : ACommand(){}
-
 PartCmd::PartCmd(const PartCmd &other) : ACommand(other) {
 	*this = other;
 }
+
+PartCmd::PartCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data) {}
 
 PartCmd::~PartCmd() {}
 
@@ -15,10 +15,10 @@ PartCmd &PartCmd::operator=(const PartCmd &other) {
 	return (*this);
 }
 
-void PartCmd::execute(int fd, const std::string &data, ChannelLst &chan_lst, UserLst &user_lst) {
-	std::vector<std::string>	channels = splitData(data.substr(0, data.find(':') - 1));
-	std::string					msg = data.substr(data.find(':') + 1);
-	Client						&user = Client::getClientByFd(user_lst, fd);
+void PartCmd::execute(int fd) {
+	std::vector<std::string>	channels = splitData();
+	std::string					msg = _data.substr(_data.find(':') + 1);
+	Client						&user = Client::getClientByFd(*_user_lst, fd);
 
 	for (std::vector<std::string>::iterator iter = channels.begin(); iter != channels.end(); iter++) {
 		if (iter->find("invalid ") != std::string::npos) {
@@ -27,7 +27,7 @@ void PartCmd::execute(int fd, const std::string &data, ChannelLst &chan_lst, Use
         	continue ;
         }
         try {
-        	Channel &chan = Channel::getChannelByName(chan_lst, *iter);
+        	Channel &chan = Channel::getChannelByName(*_chan_lst, *iter);
 			if (Channel::isUserInChannel(chan, user)) {
 				Messages::sendMsg(fd, *iter + " " + msg, user, PART);
 				chan.removeUser(user);
@@ -42,18 +42,17 @@ void PartCmd::execute(int fd, const std::string &data, ChannelLst &chan_lst, Use
 	}
 }
 
-std::vector<std::string>	PartCmd::splitData(const std::string &data) {
+std::vector<std::string>	PartCmd::splitData() {
 	std::vector<std::string>			channels;
-	std::stringstream					storage(data);
+	std::stringstream					storage(_data.substr(0, _data.find(':') - 1));
 	std::string							segment;
 
-	while (std::getline(storage, segment, ','))
+	while (std::getline(storage, segment, ',') && !segment.empty())
 		channels.push_back(segment);
 	for (std::vector<std::string>::iterator iter = channels.begin(); iter != channels.end(); iter++) {
 		if (iter->at(0) == '#')
 			continue ;
-		else
-			*iter = "invalid " + *iter;
+		*iter = "invalid " + *iter;
 	}
 	return (channels);
 }
