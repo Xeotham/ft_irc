@@ -21,7 +21,8 @@ void UserCmd::execute(int fd) {
 	std::string	username = _data;
 
 	username.erase(username.find_first_of(' '));
-	Messages::sendMsg(fd, username, user, USER);
+	if (!user.getUser().empty())
+		Messages::sendMsg(fd, username, user, USER);
 	user.setUser(username);
 	std::cout << "Client <" << fd << "> set username to : " << user.getUser() << std::endl;
 }

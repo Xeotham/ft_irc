@@ -101,68 +101,30 @@ bool	Server::passCheck(int fd, std::string data)
 	return true;
 }
 
-// void	Server::setUserCommand(int fd, std::string data)
-// {
-// //	USER <username> <hostname> <servername> :<realname>
-// 	size_t pos = data.find("USER");
-// 	data.erase(0, pos + 5);
-// 	size_t pos2 = data.find(' ');
-// 	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++) {
-// 		if (it->getFd() == fd)
-// 		{
-// 			it->setUser(data.substr(0, pos2));
-// 			std::cout << "Client <" << fd << "> set username to : " << it->getUser() << std::endl;
-// 		}
-// 	}
-// }
-//
-// void	Server::setNickCommand(int fd, std::string data)
-// {
-// 	size_t pos = data.find("NICK");
-// 	data.erase(0, pos + 5);
-// 	size_t pos2 = data.find("\r\n");
-// 	for (size_t i = 0; i < _clients.size(); i++)
-// 	{
-// 		if (_clients[i].getNick() == data.substr(0, pos2))
-// 		{
-// 			std::string message = "Error : nickname already used.\r\n";
-// 			send(fd, message.c_str(), message.size(), 0);
-// 			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
-// 			close(fd);
-// 			clearClients(fd);
-// 			return ;
-// 		}
-// 	}
-// 	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++)
-// 	{
-// 		if (it->getFd() == fd)
-// 		{
-// 			it->setNick(data.substr(0, pos2));
-// 			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
-// 		}
-// 	}
-// 	return ;
-// }
-
-void	Server::checkData(int fd, const std::string &data)
+bool	Server::checkData(int fd, const std::string &data)
 {
+	ACommand							*cmd = __nullptr;
 	std::stringstream					storage(data);
 	std::string							segment;
 	if (!passCheck(fd, data))
-		return ;
+		return (false);
 	while (std::getline(storage, segment, '\n') && !segment.empty()) {
 
 		if (segment.find('\r') != std::string::npos)
 			segment.resize(segment.size() - 1);
 		try {
-			ACommand	*cmd = 	ACommand::cmdSelector(this->_clients, this->_channels, segment);
+			cmd = 	ACommand::cmdSelector(this->_clients, this->_channels, segment);
 			cmd->execute(fd);
 			delete cmd;
+		}
+		catch (bool b) {
+			return (b);
 		}
 		catch (std::exception &e) {
 			std::cerr << e.what() << std::endl;
 		}
 	}
+	return (true);
 	// if (data.find("PRIVMSG") != std::string::npos) {
 	// 	PrivMsgCmd	cmd;
 	// 	data.erase(0, 8);
@@ -203,24 +165,24 @@ void	Server::receiveNewData(int fd)
 	std::memset(tmp, 0,sizeof(tmp));
 
 	int data = recv(fd, tmp, sizeof(tmp) - 1, 0);
-	if (data <= 0)
+	/*if (data <= 0)
 	{
 		std::cout << "Client " << fd << " disconnected." << std::endl;
 		clearClients(fd);
 		close(fd);
-	}
-	else
+	}*/
+	if (data > 0)
 	{
-		for (size_t i = 0; i < _fds.size(); i++)
+		for (size_t i = 0; i < _clients.size(); i++)
 		{
 			if (_clients[i].getFd() == fd)
 			{
-				_clients[i].setBuffer(_clients[i].getBuffer() + tmp + "\0");
+				_clients[i].setBuffer(_clients[i].getBuffer() + tmp + '\0');
 				if (_clients[i].getBuffer().find("\r\n") == std::string::npos)
 					return ;
 				std::cout << "Client " << fd << " > data : " << _clients[i].getBuffer() << std::endl;
-				checkData(fd, _clients[i].getBuffer());
-				_clients[i].setBuffer("");
+				if (checkData(fd, _clients[i].getBuffer()))
+					_clients[i].setBuffer("");
 			}
 		}
 	}

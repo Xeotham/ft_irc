@@ -26,7 +26,8 @@ class ACommand {
 			CMD_JOIN,
 			CMD_PART,
 			CMD_NICK,
-			CMD_USER
+			CMD_USER,
+			CMD_QUIT
 		};
 };
 

@@ -23,7 +23,7 @@ ACommand &ACommand::operator=(const ACommand &other) {
 
 ACommand *ACommand::cmdSelector(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) {
 	size_t						i = 0;
-	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER, ""};
+	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER, "QUIT", ""};
 	std::string					new_data;
 
 	while (!cmds[i].empty() && data.find(cmds[i].c_str(), 0, cmds[i].size()) == std::string::npos)
@@ -40,6 +40,8 @@ ACommand *ACommand::cmdSelector(UserLst &user_lst, ChannelLst &chan_lst, const s
 			return (new NickCmd(user_lst, chan_lst, new_data));
 		case CMD_USER:
 			return (new UserCmd(user_lst, chan_lst, new_data));
+		case CMD_QUIT:
+			throw (false);
 		default:
 			throw (std::invalid_argument("Invalid command"));
 	}
