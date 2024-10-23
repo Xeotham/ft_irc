@@ -32,8 +32,10 @@ void NickCmd::execute(int fd)
 			std::string message = "Error : nickname already used.\r\n";
 			send(fd, message.c_str(), message.size(), 0);
 			std::cout << "Client <" << (*_user_lst)[i].getFd() << "> disconnected." << std::endl;
-			close(fd);
-			// clearClients(fd);
+			if (user->getUser().empty()) {
+				close(fd);
+				// clearClients(fd);
+			}
 			return ;
 		}
 	}

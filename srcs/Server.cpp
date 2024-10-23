@@ -101,48 +101,48 @@ bool	Server::passCheck(int fd, std::string data)
 	return true;
 }
 
-void	Server::setUserCommand(int fd, std::string data)
-{
-//	USER <username> <hostname> <servername> :<realname>
-	size_t pos = data.find("USER");
-	data.erase(0, pos + 5);
-	size_t pos2 = data.find(' ');
-	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++) {
-		if (it->getFd() == fd)
-		{
-			it->setUser(data.substr(0, pos2));
-			std::cout << "Client <" << fd << "> set username to : " << it->getUser() << std::endl;
-		}
-	}
-}
-
-void	Server::setNickCommand(int fd, std::string data)
-{
-	size_t pos = data.find("NICK");
-	data.erase(0, pos + 5);
-	size_t pos2 = data.find("\r\n");
-	for (size_t i = 0; i < _clients.size(); i++)
-	{
-		if (_clients[i].getNick() == data.substr(0, pos2))
-		{
-			std::string message = "Error : nickname already used.\r\n";
-			send(fd, message.c_str(), message.size(), 0);
-			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
-			close(fd);
-			clearClients(fd);
-			return ;
-		}
-	}
-	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++)
-	{
-		if (it->getFd() == fd)
-		{
-			it->setNick(data.substr(0, pos2));
-			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
-		}
-	}
-	return ;
-}
+// void	Server::setUserCommand(int fd, std::string data)
+// {
+// //	USER <username> <hostname> <servername> :<realname>
+// 	size_t pos = data.find("USER");
+// 	data.erase(0, pos + 5);
+// 	size_t pos2 = data.find(' ');
+// 	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++) {
+// 		if (it->getFd() == fd)
+// 		{
+// 			it->setUser(data.substr(0, pos2));
+// 			std::cout << "Client <" << fd << "> set username to : " << it->getUser() << std::endl;
+// 		}
+// 	}
+// }
+//
+// void	Server::setNickCommand(int fd, std::string data)
+// {
+// 	size_t pos = data.find("NICK");
+// 	data.erase(0, pos + 5);
+// 	size_t pos2 = data.find("\r\n");
+// 	for (size_t i = 0; i < _clients.size(); i++)
+// 	{
+// 		if (_clients[i].getNick() == data.substr(0, pos2))
+// 		{
+// 			std::string message = "Error : nickname already used.\r\n";
+// 			send(fd, message.c_str(), message.size(), 0);
+// 			std::cout << "Client <" << _clients[i].getFd() << "> disconnected." << std::endl;
+// 			close(fd);
+// 			clearClients(fd);
+// 			return ;
+// 		}
+// 	}
+// 	for (UserLst::iterator it = _clients.begin(); it != _clients.end(); it++)
+// 	{
+// 		if (it->getFd() == fd)
+// 		{
+// 			it->setNick(data.substr(0, pos2));
+// 			std::cout << "Client <" << fd << "> set nickname to : " << it->getNick() << std::endl;
+// 		}
+// 	}
+// 	return ;
+// }
 
 void	Server::checkData(int fd, const std::string &data)
 {
@@ -292,12 +292,13 @@ void	Server::serverSocket()
 void	Server::serverInit()
 {
 	serverSocket();
-	while (Server::_signal == false)
+	while (!Server::_signal)
 	{
-		if ((poll(&_fds[0], _fds.size(), -1) == -1) && Server::_signal == false)
+		if ((poll(&_fds[0], _fds.size(), -1) == -1) && !Server::_signal)
 			throw (std::runtime_error("Error : poll() failed."));
 		for (size_t i = 0; i < _fds.size(); i++)
 		{
+			std::cout << "i : " << i << " fds size : " << _fds.size() << std::endl;
 			if (_fds[i].revents & POLLIN)
 			{
 				if (_fds[i].fd == _serverSocketFd)
