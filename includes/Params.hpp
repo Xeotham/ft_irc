@@ -1,6 +1,14 @@
 #ifndef PARAMS_HPP
 # define PARAMS_HPP
 
+class Channel;
+class Client;
+
+# include <vector>
+
+typedef std::vector<Client> UserLst;
+typedef std::vector<Channel> ChannelLst;
+
 # include <iostream>
 # include <sys/socket.h>
 # include <sys/types.h>
@@ -9,7 +17,6 @@
 # include <fcntl.h>
 # include <arpa/inet.h>
 # include <unistd.h>
-# include <vector>
 # include <map>
 # include <csignal>
 # include <limits>
@@ -19,12 +26,9 @@
 # include <netdb.h>
 # include <cstdlib>
 # include <ctime>
-#include "Messages.hpp"
+# include "Messages.hpp"
+# include "Channel.hpp"
+# include "Client.hpp"
 
-class Channel;
-class Client;
-
-typedef std::vector<Client> UserLst;
-typedef std::vector<Channel> ChannelLst;
 
 #endif //PARAMS_HPP

@@ -1,7 +1,8 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
-#include "Params.hpp"
+# include "Params.hpp"
+# include "Channel.hpp"
 
 class Client
 {
@@ -19,8 +20,8 @@ class Client
 		void	setUser(const std::string &user);
 		void	setPassword();
 		void	setBuffer(const std::string &buffer);
-		void	addChannel(const std::string &channel);
-		void	removeChannel(const std::string &channel);
+		void	addChannel(const Channel &channel);
+		void	removeChannel(const Channel &channel);
 
 		int							getFd() const;
 		std::string					getIpAdd() const;
@@ -28,17 +29,17 @@ class Client
 		std::string					getUser() const;
 		std::string					getBuffer() const;
 		bool						getPassword() const;
-		std::vector<std::string>	&getChannels();
-		static Client				&getClientByFd(std::vector<Client> &lst, int fd);
-		static bool					isClientInList(std::vector<Client> &lst, const std::string &nick);
+		ChannelLst					&getChannels();
+		static Client				&getClientByFd(UserLst &lst, int fd);
+		static bool					isClientInList(UserLst &lst, const std::string &nick);
 	private:
-		int							_fd;
-		std::string					_ipAdd;
-		std::string					_nick;
-		std::string					_user;
-		std::string					_buffer;
-		bool						_password;
-		std::vector<std::string>	_channels;
+		int			_fd;
+		std::string	_ipAdd;
+		std::string	_nick;
+		std::string	_user;
+		std::string	_buffer;
+		bool		_password;
+		ChannelLst	_channels;
 };
 
 #endif

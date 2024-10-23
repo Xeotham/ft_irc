@@ -23,7 +23,7 @@ void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string
 	if (!chan.getPassword().empty() && chan.getPassword() != data.second)
 		throw (std::invalid_argument("Error : wrong password."));
 	chan.addUser(user);
-	user.addChannel(chan.getName());
+	user.addChannel(chan);
 }
 
 void	JoinCmd::createJoinChannel(Client &user, const std::pair<std::string, std::string> &data) {
@@ -31,7 +31,7 @@ void	JoinCmd::createJoinChannel(Client &user, const std::pair<std::string, std::
 	Channel chan(data.first, data.second);
 	std::cout << "When channel created " << chan.getName() << " & " << chan.getPassword() << std::endl;
 	chan.addUser(user);
-	user.addChannel(chan.getName());
+	user.addChannel(chan);
 	_chan_lst->push_back(chan);
 }
 
@@ -58,7 +58,7 @@ void JoinCmd::execute(int fd) {
 	Client &user = Client::getClientByFd(*_user_lst, fd);
 	if (_data == "0") {
 		while (!user.getChannels().empty()) {
-			Messages::sendMsg(fd, *user.getChannels().begin() + " leaving", user, PART);
+			Messages::sendMsg(fd, user.getChannels().begin()->getName() + " leaving", user, PART);
 			user.removeChannel(*user.getChannels().begin());
 		}
 		return ;

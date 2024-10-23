@@ -75,15 +75,15 @@ void	Client::setBuffer(const std::string &buffer)
 	this->_buffer = buffer;
 }
 
-void	Client::addChannel(const std::string &channel)
+void	Client::addChannel(const Channel &channel)
 {
 	this->_channels.push_back(channel);
 }
 
-void	Client::removeChannel(const std::string &channel)
+void	Client::removeChannel(const Channel &channel)
 {
-	for (std::vector<std::string>::iterator it = this->_channels.begin(); it != this->_channels.end(); it++) {
-		if (*it == channel) {
+	for (ChannelLst::iterator it = this->_channels.begin(); it != this->_channels.end(); it++) {
+		if (it->getName() == channel.getName()) {
 			this->_channels.erase(it);
 			break;
 		}
@@ -115,12 +115,12 @@ std::string	Client::getBuffer() const
 	return this->_buffer;
 }
 
-std::vector<std::string>	&Client::getChannels()
+ChannelLst	&Client::getChannels()
 {
 	return (this->_channels);
 }
 
-Client	&Client::getClientByFd(std::vector<Client> &lst, int fd)
+Client	&Client::getClientByFd(UserLst &lst, int fd)
 {
 	for (std::vector<Client>::iterator it = lst.begin(); it != lst.end(); it++) {
 		if (it->getFd() == fd) {

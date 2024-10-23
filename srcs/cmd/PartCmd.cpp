@@ -31,7 +31,7 @@ void PartCmd::execute(int fd) {
 			if (Channel::isUserInChannel(chan, user)) {
 				Messages::sendMsg(fd, *iter + " " + msg, user, PART);
 				chan.removeUser(user);
-                user.removeChannel(chan.getName());
+                user.removeChannel(chan);
 			}
 		}
 		catch (std::exception &e) {
