@@ -28,6 +28,7 @@ class ACommand {
 			CMD_NICK,
 			CMD_USER,
 			CMD_BOT,
+			CMD_KICK,
 			CMD_QUIT
 		};
 };

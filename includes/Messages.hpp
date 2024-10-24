@@ -9,6 +9,7 @@
 # define PART "PART"
 # define NICK "NICK"
 # define USER "USER"
+# define KICK "KICK"
 
 class	Client;
 
