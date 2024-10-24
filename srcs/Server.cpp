@@ -91,15 +91,17 @@ bool	Server::passCheck(int fd, std::string line)
 
 bool	Server::checkData(int fd, const std::string &data)
 {
-	ACommand							*cmd = NULL;
-	std::stringstream					storage(data);
-	std::string							segment;
-	if (!passCheck(fd, data))
-		return (false);
-	while (std::getline(storage, segment, '\n') && !segment.empty()) {
+	ACommand			*cmd = NULL;
+	std::stringstream	storage(data);
+	std::string			segment;
+	const Client		&user = Client::getClientByFd(this->_clients, fd);
 
+	while (std::getline(storage, segment, '\n') && !segment.empty()) {
 		if (segment.find('\r') != std::string::npos)
 			segment.resize(segment.size() - 1);
+		if (!user.getPassword() && segment.find("PASS") != std::string::npos
+			&& !passCheck(fd, segment.substr(5)))
+				return false;
 		try {
 			cmd = 	ACommand::cmdSelector(this->_clients, this->_channels, segment);
 			cmd->execute(fd);
