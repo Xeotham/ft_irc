@@ -1,6 +1,6 @@
 #include <Server.hpp>
 #include <JoinCmd.hpp>
-// #include <PrivMsgCmd.hpp>
+#include <PrivMsgCmd.hpp>
 #include <PartCmd.hpp>
 
 #include "NickCmd.hpp"
