@@ -69,8 +69,6 @@ void	PrivMsgCmd::execute(int fd)
 	        send(fd, err_message.c_str(), err_message.size(), 0);
 	    }
 	}
-
-
 }
 
 std::vector<std::string> PrivMsgCmd::splitData(const std::string &data) {

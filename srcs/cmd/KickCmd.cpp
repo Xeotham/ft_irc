@@ -17,6 +17,6 @@ KickCmd::~KickCmd(){};
 void KickCmd::execute(int fd)
 {
 	Client &user = Client::getClientByFd(*_user_lst, fd);
-
+	std::string	
 
 };
