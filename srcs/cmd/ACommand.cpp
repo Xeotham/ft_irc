@@ -6,7 +6,7 @@
 #include <UserCmd.hpp>
 #include <Bot.hpp>
 
-ACommand::ACommand() : _user_lst(__nullptr), _chan_lst(__nullptr) {}
+ACommand::ACommand() : _user_lst(NULL), _chan_lst(NULL) {}
 
 ACommand::ACommand(const ACommand &other) : _user_lst(other._user_lst), _chan_lst(other._chan_lst), _data(other._data) {}
 

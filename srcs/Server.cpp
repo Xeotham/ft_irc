@@ -103,7 +103,7 @@ bool	Server::passCheck(int fd, std::string data)
 
 bool	Server::checkData(int fd, const std::string &data)
 {
-	ACommand							*cmd = __nullptr;
+	ACommand							*cmd = NULL;
 	std::stringstream					storage(data);
 	std::string							segment;
 	if (!passCheck(fd, data))

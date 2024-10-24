@@ -57,7 +57,7 @@ void	PrivMsgCmd::execute(int fd)
 	std::string					msg = _data.substr(_data.find(' ' + 1));
 	std::vector<std::string>	dest = splitData(_data.substr(0, _data.find(' ')));
 
-	for (std::vector<std::string>::iterator iter = dest.begin(); iter != dest.end(), iter++) {
+	for (std::vector<std::string>::iterator iter = dest.begin(); iter != dest.end(); iter++) {
 		if (iter->find_first_of('#') != std::string::npos)
 			this->sendMsgToChannel(user, *iter, msg);
 	    else if (*iter == "Bot")
@@ -75,6 +75,7 @@ void	PrivMsgCmd::execute(int fd)
 
 std::vector<std::string> PrivMsgCmd::splitData(const std::string &data) {
 	std::vector<std::string>	dest;
+	std::stringstream			storage(data);
 	std::string					segment;
 
 	while (std::getline(storage, segment, ',') && !segment.empty())
