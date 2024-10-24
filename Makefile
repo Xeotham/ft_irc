@@ -11,9 +11,9 @@ SRCS = 	main.cpp \
 		cmd/NickCmd.cpp \
 		cmd/KickCmd.cpp \
 		cmd/UserCmd.cpp
-
 # cmd/PrivMsgCmd.cpp \
 #Bot.cpp
+
 SRCS_DIR = srcs/
 OBJS_DIR = obj/
 INCLUDE_DIR = includes/
