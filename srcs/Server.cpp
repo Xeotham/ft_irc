@@ -50,7 +50,7 @@ void		Server::acceptNewClient()
 {
 	Client cl;
 	struct sockaddr_in	clientAdress = {};
-	struct pollfd		newPoll;
+	struct pollfd		newPoll = {};
 	socklen_t			len = sizeof(clientAdress);
 
 	int	clientSocketFd = accept(_serverSocketFd,(sockaddr *)&clientAdress, &len);
@@ -71,24 +71,12 @@ void		Server::acceptNewClient()
 	std::cout << "New client <" << clientSocketFd << "> connected." << std::endl;
 }
 
-bool	Server::passCheck(int fd, std::string data)
+bool	Server::passCheck(int fd, std::string line)
 {
 	Client &user = Client::getClientByFd(_clients, fd);
-	if (user.getPassword() || ((data.find("CAP LS 302") != std::string::npos) && (data.find("PASS") == std::string::npos) && (data.find("NICK") == std::string::npos)))
+	if (line == "LS 302")
 		return true;
-	if ((data.find("CAP LS 302") != std::string::npos) && (data.find("PASS") == std::string::npos) && (data.find("NICK") != std::string::npos))
-	{
-		std::string message = "Error : wrong password.\r\n";
-		send(fd, message.c_str(), message.size(), 0);
-		std::cout << "Client <" << fd << "> disconnected." << std::endl;
-		close(fd);
-		clearClients(fd);
-		return false;
-	}
-	size_t pos = data.find("PASS");
-	data.erase(0, pos + 5);
-	size_t pos2 = data.find("\r\n");
-	if (data.substr(0, pos2) != _password)
+	if (line != _password && !_password.empty())
 	{
 		std::string message = "Error : wrong password.\r\n";
 		send(fd, message.c_str(), message.size(), 0);
@@ -164,12 +152,13 @@ void	Server::receiveNewData(int fd)
 
 	std::memset(tmp, 0,sizeof(tmp));
 
-	int data = recv(fd, tmp, sizeof(tmp) - 1, 0);
+	size_t data = recv(fd, tmp, sizeof(tmp) - 1, 0);
 	/*if (data <= 0)
 	{
 		std::cout << "Client " << fd << " disconnected." << std::endl;
 		clearClients(fd);
 		close(fd);
+		return ;
 	}*/
 	if (data > 0)
 	{
@@ -224,8 +213,8 @@ void	Server::clearClients(int fd)
 
 void	Server::serverSocket()
 {
-	struct sockaddr_in	serverAdress;
-	struct pollfd		newPoll;
+	struct sockaddr_in	serverAdress = {};
+	struct pollfd		newPoll = {};
 
 	serverAdress.sin_family = AF_INET;
 	serverAdress.sin_port = htons(_port);
