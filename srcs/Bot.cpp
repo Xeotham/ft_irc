@@ -1,7 +1,7 @@
 #include <Bot.hpp>
 
 Bot::Bot() {}
-Bot::Bot(const Bot& other) {(void)other;}
+Bot::Bot(const Bot& other) : ACommand(other) {(void)other;}
 Bot& Bot::operator=(const Bot& other) {(void)other;	return *this;}
 Bot::~Bot() {}
 
