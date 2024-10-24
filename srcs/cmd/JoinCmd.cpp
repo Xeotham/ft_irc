@@ -7,7 +7,11 @@ JoinCmd::JoinCmd(const JoinCmd &other) : ACommand(other) {
 	*this = other;
 }
 
-JoinCmd::JoinCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data) {}
+JoinCmd::JoinCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data) 
+{
+	std::cout << "THIS IS THE DATA: '" << _data << "'" << std::endl;
+
+}
 
 JoinCmd::~JoinCmd() {}
 

@@ -43,9 +43,9 @@ ACommand *ACommand::cmdSelector(UserLst &user_lst, ChannelLst &chan_lst, const s
 		case CMD_USER:
 			return (new UserCmd(user_lst, chan_lst, new_data));
 		case CMD_BOT:
-			return (new KickCmd(user_lst, chan_lst, new_data));
-		case CMD_KICK:
 			return (new Bot(user_lst, chan_lst, new_data));
+		case CMD_KICK:
+			return (new KickCmd(user_lst, chan_lst, new_data));
 		case CMD_QUIT:
 			throw (false);
 		default:
