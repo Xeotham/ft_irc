@@ -22,16 +22,28 @@ void KickCmd::execute(int fd)
 	std::string	kicked_user;
 	std::string	comment;
 
+	std::istringstream iss(_data.c_str());
+	if (!(iss >> channel >> kicked_user >> comment))
+	{
+		std::cerr << "Error: Invalid data format" << std::endl;
+		return;
+	}
+
+	if (channel.empty() || kicked_user.empty())
+	{
+		Messages::sendMsg(fd, "KICK " + _data + " :Not enough parameters", user, "461");
+		return;
+	}
 	
-	std::cout << "This is the data in kick: " << _data << std::endl;
-	// try
-	// {
 
-	// }
-	// catch(std::invalid_argument& e)
-	// {
-
-	// }
+	try
+	{
+		Channel::getChannelByName(*_chan_lst, channel);
+	}
+	catch(std::invalid_argument& e)
+	{
+		
+	}
 	
 	
 	(void) user;
