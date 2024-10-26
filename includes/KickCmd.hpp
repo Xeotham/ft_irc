@@ -2,6 +2,7 @@
 # define KICK_HPP
 
 #include "ACommand.hpp"
+#include "Client.hpp"
 
 class KickCmd : public ACommand 
 {

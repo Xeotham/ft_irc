@@ -33,6 +33,7 @@ Channel &Channel::operator=(const Channel &other) {
 	this->_name = other._name;
 	this->_users = other._users;
 	this->_password = other._password;
+	this->_operators = other._operators;
 	return (*this);
 }
 
@@ -56,6 +57,14 @@ void Channel::addUser(Client &user) {
 	this->_users.push_back(user);
 }
 
+void	Channel::addOperator(Client& user){
+	for (UserLst::iterator it = this->_operators.begin(); it != this->_operators.end(); it++) {
+		if (it->getFd() == user.getFd())
+			throw (std::invalid_argument("The user: " + this->getName() + "is already an operator in the channel."));
+	}
+	this->_operators.push_back(user);
+}
+
 void Channel::removeUser(const Client &user) {
 	for (UserLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
 		if (it->getFd() == user.getFd()) {
@@ -64,6 +73,10 @@ void Channel::removeUser(const Client &user) {
 		}
 	}
 	throw (std::invalid_argument("The user is not in the channel."));
+}
+
+UserLst&	Channel::getOperators(){
+	return (this->_operators);
 }
 
 std::vector<Client> &Channel::getUsers() {

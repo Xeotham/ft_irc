@@ -19,6 +19,7 @@ class Channel {
 		void                    addOperator(Client& user);
 		void					removeUser(const Client& user);
 		UserLst					&getUsers();
+		UserLst					&getOperators();
 		const std::string		&getName() const;
 		const std::string		&getPassword() const;
 	public:

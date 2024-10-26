@@ -13,6 +13,7 @@ SRCS = 	main.cpp \
 		cmd/NickCmd.cpp \
 		cmd/KickCmd.cpp \
 		cmd/UserCmd.cpp
+
 SRCS_DIR = srcs/
 OBJS_DIR = obj/
 INCLUDE_DIR = includes/
