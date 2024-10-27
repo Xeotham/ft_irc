@@ -1,5 +1,5 @@
-#ifndef Topic_HPP
-# define Topic_HPP
+#ifndef TOPIC_HPP
+# define TOPIC_HPP
 
 #include "ACommand.hpp"
 #include "Client.hpp"

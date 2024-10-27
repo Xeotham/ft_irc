@@ -131,3 +131,33 @@ const std::string &Channel::getTopic() const {
 void Channel::setTopic(const std::string &topic) {
 	this->_topic = topic;
 }
+
+void	Channel::setMode(const char mode, const bool enable){
+	if (enable)
+		_modes.insert(mode);
+	else
+		_modes.erase(mode);
+}
+
+bool	Channel::isModeSet(const char mode) const{
+	if (_modes.find(mode) != _modes.end())
+		return (true);
+	else
+		return (false);
+}
+
+const std::string	Channel::getModes() const{
+	std::string modes;
+	for (std::set<char>::iterator it = _modes.begin(); it != _modes.end(); ++it) {
+		modes += *it;
+	}
+	return (modes);
+}
+
+bool	Channel::isExistingMode(const char c) const{
+	const std::string	existing_modes = "itkol";
+	if (existing_modes.find(c) != std::string::npos)
+		return (true);
+	else
+		return (false);
+}

@@ -9,9 +9,9 @@ TopicCmd::~TopicCmd(){}
 
 void	TopicCmd::execute(int fd)
 {
-	Client& 	sender = Client::getClientByFd(*_user_lst, fd);
-	std::string	channel;
-	std::string	topic;
+	Client& 		sender = Client::getClientByFd(*_user_lst, fd);
+	std::string		channel;
+	std::string		topic;
 
 	std::istringstream iss(_data);
     std::getline(iss, channel, ' ');
