@@ -15,6 +15,7 @@ class Channel {
 		Channel& operator=(const Channel& other);
 	public:
 		void					setName(const std::string& name);
+		void					setTopic(const std::string& topic);
 		void					addUser(Client& user);
 		void                    addOperator(Client& user);
 		void					removeUser(const Client& user);
@@ -22,14 +23,18 @@ class Channel {
 		UserLst					&getOperators();
 		const std::string		&getName() const;
 		const std::string		&getPassword() const;
+		const std::string		&getTopic() const;
 	public:
 		static Channel	&getChannelByName(ChannelLst &lst, const std::string &name);
+		static Channel	*getChannelByNamePt(ChannelLst &lst, const std::string &name);
 		static bool		isUserInChannel(Channel &channel, const Client &user);
+		static bool		isOperatorInChannel(Channel &channel, const Client &user);
 	private:
 		Channel();
 	private:
 		std::string	_name;
 		std::string	_password;
+		std::string	_topic;
 		UserLst		_operators;
 		UserLst		_users;
 };

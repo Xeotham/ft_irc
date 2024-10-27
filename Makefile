@@ -12,6 +12,7 @@ SRCS = 	main.cpp \
 		cmd/PrivMsgCmd.cpp \
 		cmd/NickCmd.cpp \
 		cmd/KickCmd.cpp \
+		cmd/TopicCmd.cpp \
 		cmd/UserCmd.cpp
 
 SRCS_DIR = srcs/

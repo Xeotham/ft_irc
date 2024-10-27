@@ -1,5 +1,4 @@
 #include "KickCmd.hpp"
-#include "stdio.h"
 
 KickCmd::KickCmd(){}
 
@@ -25,7 +24,7 @@ void KickCmd::execute(int fd)
 		Messages::sendMsg(fd, "KICK " + _data + " :Not enough parameters", user, "461");
 		return ;
 	}
-	
+
 	try
 	{
 		Channel& target_channel = Channel::getChannelByName(*_chan_lst, channel);
