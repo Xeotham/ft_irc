@@ -35,6 +35,7 @@ Client	&Client::operator=(const Client &ref)
 	this->_nick = ref._nick;
 	this->_user = ref._user;
 	this->_password = ref._password;
+	this->_channels = ref._channels;
 	return (*this);
 }
 

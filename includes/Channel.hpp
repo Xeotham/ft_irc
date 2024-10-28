@@ -4,6 +4,7 @@
 # include <Params.hpp>
 # include <map>
 # include <Client.hpp>
+# include <set>
 
 class Channel {
 	public:
@@ -17,15 +18,19 @@ class Channel {
 		void					setName(const std::string& name);
 		void					setTopic(const std::string& topic);
 		void					setMode(const char mode, const bool enable);
-		void					addUser(Client& user);
-		void                    addOperator(Client& user);
+		void 					setUserLimit(unsigned int limit);		
+		void					setPassword(const std::string &password);
+		void					addUser(Client user);
+		void                    addOperator(Client user);
 		void					removeUser(const Client& user);
+		void					removeOperator(const Client& user);		
 		UserLst					&getUsers();
 		UserLst					&getOperators();
 		const std::string		&getName() const;
 		const std::string		&getPassword() const;
 		const std::string		&getTopic() const;
 		const std::string		getModes() const;
+		unsigned int			getUserLimit() const;
 		bool					isModeSet(const char mode) const;
 		bool					isExistingMode(const char c) const;
 	public:
@@ -42,6 +47,7 @@ class Channel {
 		std::set<char>	_modes;
 		UserLst			_operators;
 		UserLst			_users;
+		unsigned int	_user_limit;
 };
 
 #endif // CHANNEL_HPP

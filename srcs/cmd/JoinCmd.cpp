@@ -26,7 +26,7 @@ void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string
 	user.addChannel(chan);
 }
 
-void	JoinCmd::createJoinChannel(Client &user, const std::pair<std::string, std::string> &data) {
+void	JoinCmd::createJoinChannel(Client user, const std::pair<std::string, std::string> &data) {
 	std::cout << "When creating Channel " << data.first << " & " << data.second << std::endl;
 	Channel chan(data.first, data.second);
 	std::cout << "When channel created " << chan.getName() << " & " << chan.getPassword() << std::endl;
