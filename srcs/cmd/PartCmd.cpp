@@ -23,7 +23,8 @@ void PartCmd::execute(int fd) {
 	for (std::vector<std::string>::iterator iter = channels.begin(); iter != channels.end(); iter++) {
 		if (iter->find("invalid ") != std::string::npos) {
 			std::string err_msg = "Channel " + iter->substr(8) + " is not a valid channel name\r\n";
-        	send(fd, err_msg.c_str(), err_msg.size(), 0);
+			Messages::sendServMsg(fd, err_msg, PART);
+			// send(fd, err_msg.c_str(), err_msg.size(), 0);
         	continue ;
         }
         try {
@@ -38,7 +39,6 @@ void PartCmd::execute(int fd) {
 			std::string err_msg = user.getNick() + " is not in the " + *iter + " channel.\r\n";
 			send(fd, err_msg.c_str(), err_msg.size(), 0);
         }
-
 	}
 }
 

@@ -71,8 +71,7 @@ void JoinCmd::execute(int fd) {
 			Messages::sendMsg(fd, it->first, user, JOIN);
 		}
 		catch (std::exception &e) {
-			std::string msg(std::string(e.what()) + "\r\n");
-			send(fd, msg.c_str(), msg.size(), 0);
+			Messages::sendServMsg(fd, JOIN, e.what());
 		}
 	}
 }
