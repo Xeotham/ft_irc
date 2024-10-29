@@ -43,6 +43,7 @@ Channel &Channel::operator=(const Channel &other) {
 	this->_topic = other._topic;
 	this->_modes = other._modes;
 	this->_user_limit = other._user_limit;
+	this->_invited_users = other._invited_users;
 	return (*this);
 }
 
@@ -188,4 +189,20 @@ void Channel::setUserLimit(unsigned int limit) {
 
 void Channel::setPassword(const std::string &password) {
 	this->_password = password;
+}
+
+bool	Channel::isInvitedUserInChannel(Channel &channel, const Client &user) {
+	for (UserLst::const_iterator it = channel._invited_users.begin(); it != channel._invited_users.end(); it++) {
+		if (it->getFd() == user.getFd())
+			return (true);
+	}
+	return (false);
+}
+
+void Channel::addInvitedUser(Client user) {
+	for (UserLst::iterator it = this->_invited_users.begin(); it != this->_invited_users.end(); it++) {
+		if (it->getFd() == user.getFd())
+			throw (std::invalid_argument("The user is already invited to the " + this->getName() + " channel."));
+	}
+	this->_invited_users.push_back(user);
 }

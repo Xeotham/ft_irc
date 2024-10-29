@@ -22,6 +22,7 @@ class Channel {
 		void					setPassword(const std::string &password);
 		void					addUser(Client user);
 		void                    addOperator(Client user);
+		void					addInvitedUser(Client user);
 		void					removeUser(const Client& user);
 		void					removeOperator(const Client& user);		
 		UserLst					&getUsers();
@@ -38,6 +39,7 @@ class Channel {
 		static Channel	*getChannelByNamePt(ChannelLst &lst, const std::string &name);
 		static bool		isUserInChannel(Channel &channel, const Client &user);
 		static bool		isOperatorInChannel(Channel &channel, const Client &user);
+		static bool		isInvitedUserInChannel(Channel &channel, const Client &user);
 	private:
 		Channel();
 	private:
@@ -45,6 +47,7 @@ class Channel {
 		std::string		_password;
 		std::string		_topic;
 		std::set<char>	_modes;
+		UserLst			_invited_users;
 		UserLst			_operators;
 		UserLst			_users;
 		unsigned int	_user_limit;

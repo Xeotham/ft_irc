@@ -131,14 +131,14 @@ Client	&Client::getClientByFd(UserLst &lst, int fd)
 	throw (std::invalid_argument("Client not found."));
 }
 
-Client &Client::getClientByNick(UserLst &lst, std::string& nick)
+Client *Client::getClientByNick(UserLst &lst, std::string& nick)
 {
 	for (std::vector<Client>::iterator it = lst.begin(); it != lst.end(); it++) {
 		if (it->getNick() == nick) {
-			return (*it);
+			return (&(*it));
 		}
 	}
-	throw (std::invalid_argument("Client not found."));
+	return (NULL);
 }
 
 bool	Client::isClientInList(UserLst &lst, const std::string &nick)

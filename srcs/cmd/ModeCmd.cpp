@@ -92,6 +92,22 @@ void	ModeCmd::execute(int fd)
 	}
 }
 
+void	ModeCmd::iMode(Channel *target_channel, const bool enable, Client &sender){
+	if (!enable)
+		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " -i", sender, "MODE");	
+	else
+		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " +i", sender, "MODE");
+	target_channel->setMode('i', enable);
+}
+
+void	ModeCmd::tMode(Channel *target_channel, const bool enable, Client &sender){
+	if (!enable)
+		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " -t", sender, "MODE");	
+	else
+		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " +t", sender, "MODE");
+	target_channel->setMode('t', enable);
+}
+
 void	ModeCmd::kMode(Channel *target_channel, const bool enable, const std::string arg, Client &sender){
 	if (!enable){
 		target_channel->setPassword(""); 
@@ -107,19 +123,20 @@ void	ModeCmd::kMode(Channel *target_channel, const bool enable, const std::strin
 }
 
 void	ModeCmd::oMode(Channel *target_channel, const bool enable, std::string arg, int fd, Client &sender){	
-	if (!Client::isClientInList(target_channel->getUsers(), arg)){
-		Messages::sendServMsg(fd, arg + " :No such nick/channel", "401 " + sender.getNick()); 
-		target_channel->setMode('o', enable); 
-		return;}
 	
-	Client& target_client = Client::getClientByNick(target_channel->getUsers(), arg);
-	if (!enable){
-		target_channel->removeOperator(target_client); 
-		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " -o " + target_client.getNick(), sender, "MODE");		
+	Client* target_client = Client::getClientByNick(target_channel->getUsers(), arg);
+	if (!target_channel){
+		Messages::sendServMsg(fd, arg + " :No such nick/channel", "401 " + sender.getNick()); 
 		return;}
-	target_channel->addOperator(target_client); // Should I catch the throw or it's useless?
+
+	if (!enable){
+		target_channel->removeOperator(*target_client); 
+		target_channel->setMode('o', enable); 
+		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " -o " + target_client->getNick(), sender, "MODE");		
+		return;}
+	target_channel->addOperator(*target_client); // Should I catch the throw or it's useless?
 	target_channel->setMode('o', enable);
-	Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " +o " + target_client.getNick(), sender, "MODE");
+	Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " +o " + target_client->getNick(), sender, "MODE");
 }
 
 void	ModeCmd::lMode(Channel *target_channel, const bool enable, const std::string arg, Client &sender){	
@@ -140,21 +157,4 @@ void	ModeCmd::lMode(Channel *target_channel, const bool enable, const std::strin
 	target_channel->setUserLimit(limit);
 	target_channel->setMode('l', enable);
 	Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " +l " + arg, sender, "MODE");
-}
-
-void	ModeCmd::iMode(Channel *target_channel, const bool enable, Client &sender){
-	if (!enable)
-		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " -i", sender, "MODE");	
-	else
-		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " +i", sender, "MODE");
-	target_channel->setMode('i', enable);
-}
-
-
-void	ModeCmd::tMode(Channel *target_channel, const bool enable, Client &sender){
-	if (!enable)
-		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " -t", sender, "MODE");	
-	else
-		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " +t", sender, "MODE");
-	target_channel->setMode('t', enable);
 }

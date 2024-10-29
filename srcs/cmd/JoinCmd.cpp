@@ -24,6 +24,10 @@ void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string
 		throw (std::invalid_argument("Error : wrong password."));
 	chan.addUser(user);
 	user.addChannel(chan);
+
+
+	// HANDLE INVITE SYSTEM
+	// if I use invitation -> delete the user in the invite list
 }
 
 void	JoinCmd::createJoinChannel(Client user, const std::pair<std::string, std::string> &data) {

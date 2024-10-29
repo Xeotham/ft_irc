@@ -14,6 +14,7 @@ SRCS = 	main.cpp \
 		cmd/KickCmd.cpp \
 		cmd/TopicCmd.cpp \
 		cmd/ModeCmd.cpp \
+		cmd/InviteCmd.cpp \
 		cmd/UserCmd.cpp
 
 SRCS_DIR = srcs/

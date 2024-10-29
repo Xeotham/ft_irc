@@ -31,7 +31,7 @@ class Client
 		bool						getPassword() const;
 		ChannelLst					&getChannels();
 		static Client				&getClientByFd(UserLst &lst, int fd);
-		static Client				&getClientByNick(UserLst &lst, std::string& nick);
+		static Client				*getClientByNick(UserLst &lst, std::string& nick);
 		static bool					isClientInList(UserLst &lst, const std::string &nick);
 	private:
 		int			_fd;
