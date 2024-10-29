@@ -18,23 +18,25 @@ void	TopicCmd::execute(int fd)
     std::getline(iss, topic);
 
 	if (channel.empty()){
-		Messages::sendMsg(fd, "TOPIC :Not enough parameters", sender, "461"); return ;}
+		Messages::sendServMsg(fd, "TOPIC :Not enough parameters", "461 " + sender.getNick()); return ;}
 
 	Channel* target_channel = Channel::getChannelByNamePt(*_chan_lst, channel);
 	if (!target_channel){
-		Messages::sendMsg(fd, channel + " :No such channel", sender, "403"); return ;}
+		Messages::sendServMsg(fd, channel + " :No such channel", "403 " + sender.getNick()); return ;}
 
 	if (!Channel::isUserInChannel(*target_channel, sender)){
-		Messages::sendMsg(fd, channel + " :You're not on that channel", sender, "442"); return ;}
+		Messages::sendServMsg(fd, channel + " :You're not on that channel", "442 " + sender.getNick()); return ;}
 
 	if (topic.empty() && target_channel->getTopic().empty()){
-		Messages::sendMsg(fd, channel + " :No topic is set", sender, "331"); return ;}
+		Messages::sendServMsg(fd, channel + " :No topic is set", "331 " + sender.getNick()); return ;}
 
 	if (topic.empty()){
-		Messages::sendMsg(fd, channel + " " + target_channel->getTopic(), sender, "332"); return ;}
+		Messages::sendServMsg(fd, channel + " " + target_channel->getTopic(), "332 " + sender.getNick()); return ;}
 
 	if (!Channel::isOperatorInChannel(*target_channel, sender)){
-		Messages::sendMsg(fd, channel + " :You're not channel operator", sender, "482"); return ;}
+		Messages::sendServMsg(fd, channel + " :You're not channel operator", "482 " + sender.getNick()); return ;}
 
 	target_channel->setTopic(topic);
+	std::string msg = channel + " " + topic;
+	Messages::sendGlobalMsg(target_channel->getUsers(), msg, sender, "TOPIC");
 }

@@ -21,7 +21,7 @@ void KickCmd::execute(int fd)
 
 	if (channel.empty() || kicked_user.empty())
 	{
-		Messages::sendMsg(fd, "KICK " + _data + " :Not enough parameters", user, "461");
+		Messages::sendServMsg(fd, "KICK " + _data + " :Not enough parameters", "461 " + user.getNick());
 		return ;
 	}
 
@@ -33,14 +33,14 @@ void KickCmd::execute(int fd)
 	}
 	catch (std::invalid_argument& e)
 	{
-		Messages::sendMsg(fd, channel + " :No such nick/channel", user, "401");
+		Messages::sendServMsg(fd, channel + " :No such nick/channel", "401 " + user.getNick());
 		return ;
 	}
 	
 	Channel& target_channel = Channel::getChannelByName(*_chan_lst, channel);
 	if (!Client::isClientInList(target_channel.getUsers(), user.getNick()))
 	{
-		Messages::sendMsg(fd, channel + " :You're not on that channel", user, "442");
+		Messages::sendServMsg(fd, channel + " :You're not on that channel", "442 " + user.getNick());
 		return ;
 	}
 
@@ -49,7 +49,7 @@ void KickCmd::execute(int fd)
 	{
 		if (it == operator_list.end())
 		{
-			Messages::sendMsg(fd, channel + " :You're not channel operator", user, "482");
+			Messages::sendServMsg(fd, channel + " :You're not channel operator", "482 " + user.getNick());
 			return ;
 		}
 		if (it->getNick() == user.getNick())
@@ -61,9 +61,9 @@ void KickCmd::execute(int fd)
 		if (ti->getNick() == kicked_user)
 		{
 			Client& kicked_client = *ti;
-			std::string message = target_channel.getName() + " " + kicked_client.getNick() + " :";
+			std::string message = target_channel.getName() + " " + kicked_client.getNick();
 			if (comment.empty())
-				Messages::sendGlobalMsg(target_channel.getUsers(), message + kicked_client.getNick(), user, "KICK");
+				Messages::sendGlobalMsg(target_channel.getUsers(), message + " :" + kicked_client.getNick(), user, "KICK");
 			else
 				Messages::sendGlobalMsg(target_channel.getUsers(), message + comment, user, "KICK");
 			target_channel.removeUser(kicked_client);

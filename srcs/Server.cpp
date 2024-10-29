@@ -131,6 +131,7 @@ std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
 
 		}
 		catch (bool b) {
+			this->clearClients(fd);
 			return (b);
 		}
 		catch (std::exception &e) {
