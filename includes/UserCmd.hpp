@@ -15,6 +15,9 @@ class UserCmd : public ACommand
 		void	execute(int fd);
 	private:
 		UserCmd();
+	private:
+		void	checkData(int fd);
+		void	checkData(int fd, const std::string &user_name);
 };
 
 #endif

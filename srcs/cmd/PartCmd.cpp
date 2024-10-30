@@ -31,29 +31,26 @@ void	PartCmd::exitChannel(Client	&user, Channel &chan, const std::string &msg) {
 }
 
 void PartCmd::execute(int fd) {
-	std::vector<std::string>	channels = splitData();
-	std::string					msg = _data.substr(_data.find(':') + 1);
 	Client						&user = Client::getClientByFd(*_user_lst, fd);
 
+	if (_data.empty())
+		throw Error(fd, user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("PART"));
+
+	std::vector<std::string>	channels = splitData(fd);
+	std::string					msg = _data.substr(_data.find(':') + 1);
+
 	for (std::vector<std::string>::iterator iter = channels.begin(); iter != channels.end(); iter++) {
-		if (iter->find("invalid ") != std::string::npos) {
-			std::string err_msg = "Channel " + iter->substr(8) + " is not a valid channel name\r\n";
-			Messages::sendServMsg(fd, err_msg, PART);
-			// send(fd, err_msg.c_str(), err_msg.size(), 0);
-        	continue ;
-        }
         try {
         	Channel &chan = Channel::getChannelByName(*_chan_lst, *iter);
 			this->exitChannel(user, chan, msg);
 		}
 		catch (std::exception &e) {
-			std::string err_msg = user.getNick() + " is not in the " + *iter + " channel.\r\n";
-			send(fd, err_msg.c_str(), err_msg.size(), 0);
+			throw Error(fd, user, ERR_NOTONCHANNEL, NOTONCHANNEL_MSG(*iter));
         }
 	}
 }
 
-std::vector<std::string>	PartCmd::splitData() {
+std::vector<std::string>	PartCmd::splitData(int fd) {
 	std::vector<std::string>			channels;
 	std::stringstream					storage(_data.substr(0, _data.find(':') - 1));
 	std::string							segment;
@@ -61,9 +58,8 @@ std::vector<std::string>	PartCmd::splitData() {
 	while (std::getline(storage, segment, ',') && !segment.empty())
 		channels.push_back(segment);
 	for (std::vector<std::string>::iterator iter = channels.begin(); iter != channels.end(); iter++) {
-		if (iter->at(0) == '#')
-			continue ;
-		*iter = "invalid " + *iter;
+		if (iter->at(0) != '#')
+			throw Error(fd,Client::getClientByFd(*_user_lst, fd), ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(*iter));
 	}
 	return (channels);
 }

@@ -2,19 +2,20 @@ NAME = ircserv
 
 SRCS = 	main.cpp \
 		Bot.cpp \
+		Error.cpp \
 		Client.cpp \
 		Server.cpp \
 		Channel.cpp \
 		Messages.cpp \
+		cmd/WhoCmd.cpp \
+		cmd/NickCmd.cpp \
+		cmd/UserCmd.cpp \
+		cmd/PingCmd.cpp \
 		cmd/JoinCmd.cpp \
 		cmd/PartCmd.cpp \
 		cmd/ACommand.cpp \
-		cmd/PrivMsgCmd.cpp \
-		cmd/NickCmd.cpp \
-		cmd/UserCmd.cpp \
-		cmd/WhoCmd.cpp \
-		cmd/PingCmd.cpp \
-		cmd/NamesCmd.cpp
+		cmd/NamesCmd.cpp \
+		cmd/PrivMsgCmd.cpp
 SRCS_DIR = srcs/
 OBJS_DIR = obj/
 INCLUDE_DIR = includes/

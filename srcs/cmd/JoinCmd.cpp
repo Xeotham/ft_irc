@@ -20,17 +20,25 @@ JoinCmd &JoinCmd::operator=(const JoinCmd &other) {
 }
 
 void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string> &data) {
-	Channel &chan = Channel::getChannelByName(*_chan_lst, data.first);
+	try {
+		Channel &chan = Channel::getChannelByName(*_chan_lst, data.first);
 
-	std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
-	if (!chan.getPassword().empty() && chan.getPassword() != data.second)
-		throw (std::invalid_argument("Error : wrong password."));
-	chan.addUser(user);
-	user.addChannel(chan);
-	for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-		if (it->getNick() == user.getNick())
-			continue ;
-		Messages::sendMsg(it->getFd(), chan.getName(), user, JOIN);
+		std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
+		if (!chan.getPassword().empty() && chan.getPassword() != data.second)
+			throw (std::invalid_argument("Error : wrong password."));
+		chan.addUser(user);
+		user.addChannel(chan);
+		for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+			if (it->getNick() == user.getNick())
+				continue ;
+			Messages::sendMsg(it->getFd(), chan.getName(), user, JOIN);
+		}
+	}
+	catch (std::exception &e) {
+		if (std::string(e.what()) == "Channel not found.")
+			throw Error(user.getFd(),user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(data.first));
+		else
+			throw Error(user.getFd(), user, ERR_BADCHANNELKEY, BADCHANNELKEY_MSG(data.first));
 	}
 
 }
@@ -50,9 +58,9 @@ void	JoinCmd::joinOneChannel(Client &user, const std::pair<std::string, std::str
 	try {
 	    this->joinChannel(user, data);
 	}
-	catch (std::exception &ex) {
-		if (std::string(ex.what()) == "Error : wrong password.")
-			throw (std::invalid_argument("Error : wrong password to join " + data.first + "."));
+	catch (Error &err) {
+		if (err.getType() == ERR_BADCHANNELKEY)
+			throw err;
 		try {
 	        this->createJoinChannel(user, data);
 		}
@@ -64,6 +72,9 @@ void	JoinCmd::joinOneChannel(Client &user, const std::pair<std::string, std::str
 
 void JoinCmd::execute(int fd) {
 	Client &user = Client::getClientByFd(*_user_lst, fd);
+
+	if (_data.empty())
+		throw Error(fd, user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("JOIN"));
 	if (_data == "0") {
 		std::string	part_param;
 		for (ChannelLst::iterator it = _chan_lst->begin(); it != _chan_lst->end(); it++) {
@@ -76,7 +87,7 @@ void JoinCmd::execute(int fd) {
 		part.execute(fd);
 		return ;
 	}
-	std::map<std::string, std::string>	channels = this->splitData();
+	std::map<std::string, std::string>	channels = this->splitData(fd);
 	std::cout << user.getNick() << " try to join" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
 		try {
@@ -84,7 +95,6 @@ void JoinCmd::execute(int fd) {
 			Messages::sendMsg(fd, it->first, user, JOIN);
 			NamesCmd names(*_user_lst, *_chan_lst, it->first);
 			names.execute(fd);
-			// this->sendNames(user, Channel::getChannelByName(*_chan_lst, it->first));
 		}
 		catch (std::exception &e) {
 			Messages::sendServMsg(fd, e.what(), JOIN);
@@ -92,7 +102,7 @@ void JoinCmd::execute(int fd) {
 	}
 }
 
-std::map<std::string, std::string>	JoinCmd::splitData() {
+std::map<std::string, std::string>	JoinCmd::splitData(int fd) {
 	std::map<std::string, std::string>	channels_mdp;
 	std::vector<std::string>			channels;
 	std::stringstream					storage(_data);
@@ -107,8 +117,7 @@ std::map<std::string, std::string>	JoinCmd::splitData() {
 		break ;
 	}
 	if (iter == channels.begin()) {
-		channels_mdp.insert(std::make_pair("invalid", ""));
-		return (channels_mdp);
+		throw Error(fd,Client::getClientByFd(*_user_lst, fd), ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(*iter));
 	}
 	for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
 		if (it->at(0) != '#')

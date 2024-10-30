@@ -17,13 +17,13 @@ WhoCmd	&WhoCmd::operator=(const WhoCmd &other)
 
 void	WhoCmd::sendData(int fd, Client &user, Channel &chan) {
 	for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-		std::string	data = user.getNick() + " " + chan.getName() + " " + it->getUser() + " localhost " + SERVER_NAME + " " + it->getNick() + " :0 " + "realname";
+		std::string	data = user.getNick() + " " + chan.getName() + " " + it->getUser() + " localhost " + SERVER_NAME + " " + it->getNick() + " :0 " + it->getRealname();
 		Messages::sendServMsg(fd, data, WHOREPLY);
 	}
 }
 
 void	WhoCmd::sendData(int fd, Client &user, Client &target) {
-	std::string	data = user.getNick() + " " + target.getUser() + " localhost " + SERVER_NAME + " " + target.getNick() + " :0 " + "realname";
+	std::string	data = user.getNick() + " " + target.getUser() + " localhost " + SERVER_NAME + " " + target.getNick() + " :0 " + user.getRealname();
 	Messages::sendServMsg(fd, data, WHOREPLY);
 }
 

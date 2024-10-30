@@ -24,7 +24,7 @@ ACommand &ACommand::operator=(const ACommand &other) {
 	return (*this);
 }
 
-ACommand *ACommand::cmdSelector(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) {
+ACommand *ACommand::cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) {
 	size_t						i = 0;
 	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER, BOT_CMD, QUIT, WHO, PING ,END_OF_ARRAY};
 	std::string					new_data;
@@ -52,7 +52,7 @@ ACommand *ACommand::cmdSelector(UserLst &user_lst, ChannelLst &chan_lst, const s
 		case CMD_QUIT:
 			throw (false);
 		default:
-			throw (std::invalid_argument("Invalid command"));
+			throw Error(fd, Client::getClientByFd(user_lst, fd), ERR_UNKNOWNCOMMAND, UNKNOWNCOMMAND_MSG(data));
 	}
 }
 

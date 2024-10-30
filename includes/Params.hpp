@@ -30,6 +30,7 @@ typedef std::vector<Channel> ChannelLst;
 # include "Messages.hpp"
 # include "Channel.hpp"
 # include "Client.hpp"
+# include "Error.hpp"
 
 # define SERVER_NAME std::string("IRC")
 

@@ -37,22 +37,24 @@ void    Bot::sendPong(int fd, Client &user)
 
 void    Bot::execute(int fd)
 {
-	int i = 0;
-	// size_t pos = 0;
 	Client &user = Client::getClientByFd(*_user_lst, fd);
+
+	if (_data.empty())
+		throw Error(fd, user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("BOT"));
+
+	int i = 0;
 	std::string cmd[] = {"cmd", "joke", "ping"};
 	std::cout << _data << std::endl;
 	while(i < 3 && cmd[i].compare(_data))
 		i++;
 	switch (i) {
 		case 0:
-			sendCommand(fd, user);
-			break;
+			return (sendCommand(fd, user));
 		case 1:
-			sendJoke(fd, user);
-			break;
+			return (sendJoke(fd, user));
 		case 2:
-			sendPong(fd, user);
-			break;
+			return (sendPong(fd, user));
+		default:
+			throw Error(fd, user, ERR_UNKNOWNCOMMAND, UNKNOWNCOMMAND_MSG("BOT " + _data));
 	}
 }
