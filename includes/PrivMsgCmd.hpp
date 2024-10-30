@@ -18,7 +18,7 @@ class PrivMsgCmd : public ACommand {
 		void						sendMsgToChannel(Client &user, const std::string &channel, const std::string &msg);
         void						sendMsgToUser(Client &user, const std::string &dest, const std::string &msg);
 		void						sendMsgToBot(int fd);
-		std::vector<std::string>	splitData(const std::string &data);
+		std::vector<std::string>	splitData(int fd, const std::string &data);
 };
 
 

@@ -21,16 +21,24 @@ PrivMsgCmd &PrivMsgCmd::operator=(const PrivMsgCmd &other)
 
 void	PrivMsgCmd::sendMsgToChannel(Client &user, const std::string &channel, const std::string &msg)
 {
-	Channel &chan = Channel::getChannelByName(*_chan_lst, channel);
-
-	if (Channel::isUserInChannel(chan, user)) {
-		for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-			if (it->getFd() != user.getFd()) {
-				std::cout << "Client <" << user.getFd() << "> send message to <" << it->getNick() << "> : " << _data << std::endl;
-				Messages::sendMsg(it->getFd(), channel + " :" + msg, user, MSG);
+	try {
+		Channel	&chan = Channel::getChannelByName(*_chan_lst, channel);
+		if (Channel::isUserInChannel(chan, user)) {
+			for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+				if (it->getFd() != user.getFd()) {
+					std::cout << "Client <" << user.getFd() << "> send message to <" << it->getNick() << "> : " << _data << std::endl;
+					Messages::sendMsg(it->getFd(), channel + " :" + msg, user, MSG);
+				}
 			}
 		}
 	}
+	catch (std::exception &e) {
+		if (std::string(e.what()) == "Channel not found.")
+			throw Error(user.getFd(), user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(channel));
+		else
+			throw Error(user.getFd(), user, ERR_CANNOTSENDTOCHAN, CANNOTSENDTOCHAN_MSG(channel));
+	}
+
 }
 
 void	PrivMsgCmd::sendMsgToUser(Client &user, const std::string &dest, const std::string &msg)
@@ -51,27 +59,31 @@ void    PrivMsgCmd::sendMsgToBot(int fd)
     bot.execute(fd);
 }
 
-void	PrivMsgCmd::execute(int fd)
-{
+void	PrivMsgCmd::execute(int fd) {
 	Client						&user = Client::getClientByFd(*_user_lst, fd);
-	std::string					msg = _data.substr(_data.find(' ' ) + 2);
-	std::vector<std::string>	dest = splitData(_data.substr(0, _data.find(' ')));
 
+	if (_data.empty())
+		throw Error(fd, user, ERR_NORECIPIENT, NORECIPIENT_MSG("PRIVMSG"));
+
+	std::string					msg = _data.substr(_data.find(' ' ) + 2);
+	std::vector<std::string>	dest = splitData(fd, _data.substr(0, _data.find(' ')));
+
+	if (msg.empty())
+		throw Error(fd, user, ERR_NOTEXTTOSEND, NOTEXTTOSEND_MSG);
 	for (std::vector<std::string>::iterator iter = dest.begin(); iter != dest.end(); iter++) {
 		if (iter->find_first_of('#') != std::string::npos)
 			this->sendMsgToChannel(user, *iter, msg);
 	    else if (*iter == "Bot")
-    		this->sendMsgToBot(fd);
+			this->sendMsgToBot(fd);
 		else if (Client::isClientInList(*_user_lst, *iter))
 			this->sendMsgToUser(user, *iter, msg);
 	    else {
-	        std::string err_message = "Error : user not found.\r\n";
-	        send(fd, err_message.c_str(), err_message.size(), 0);
+	        throw Error(fd, user, ERR_NOSUCHNICK, NOSUCHNICK_MSG(*iter));
 	    }
 	}
 }
 
-std::vector<std::string> PrivMsgCmd::splitData(const std::string &data) {
+std::vector<std::string> PrivMsgCmd::splitData(int fd, const std::string &data) {
 	std::vector<std::string>	dest;
 	std::stringstream			storage(data);
 	std::string					segment;
@@ -79,5 +91,11 @@ std::vector<std::string> PrivMsgCmd::splitData(const std::string &data) {
 	std::cout << data << std::endl;
 	while (std::getline(storage, segment, ',') && !segment.empty())
 		dest.push_back(segment);
+	for (std::vector<std::string>::iterator it = dest.begin(); it != dest.end(); it++) {
+		for (std::vector<std::string>::iterator it2 = it + 1; it2 != dest.end(); it2++) {
+			if (*it == *it2)
+				throw Error(fd, Client::getClientByFd(*_user_lst, fd), ERR_TOOMANYTARGETS, TOOMANYTARGETS_MSG);
+		}
+	}
 	return (dest);
 }

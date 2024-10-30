@@ -105,7 +105,7 @@ bool	Server::checkData(int fd, const std::string &data)
 			&& !passCheck(fd, segment.substr(5)))
 				return false;
 		try {
-			cmd = ACommand::cmdSelector(this->_clients, this->_channels, segment);
+			cmd = ACommand::cmdSelector(fd, this->_clients, this->_channels, segment);
 			cmd->execute(fd);
 			delete cmd;
 
@@ -133,11 +133,15 @@ std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
 
 		}
 		catch (bool b) {
-			this->clearClients(fd);
+			if (!b)
+				this->clearClients(fd);
 			return (b);
 		}
-		catch (std::exception &e) {
-			std::cerr << e.what() << std::endl;
+		catch (Error &e) {
+			std::cout << "test" << std::endl;
+			if (cmd)
+				delete cmd;
+			e.sendError();
 		}
 	}
 	return (true);
@@ -277,7 +281,7 @@ void	Server::serverInit()
 			throw (std::runtime_error("Error : poll() failed."));
 		for (size_t i = 0; i < _fds.size(); i++)
 		{
-			std::cout << "i : " << i << " fds size : " << _fds.size() << std::endl;
+			// std::cout << "i : " << i << " fds size : " << _fds.size() << std::endl;
 			if (_fds[i].revents & POLLIN)
 			{
 				if (_fds[i].fd == _serverSocketFd)

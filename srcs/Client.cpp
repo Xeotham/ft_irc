@@ -65,6 +65,11 @@ void	Client::setUser(const std::string &user)
 	this->_user = user;
 }
 
+void	Client::setRealname(const std::string &realname)
+{
+	this->_realname = realname;
+}
+
 void	Client::setPassword()
 {
 	this->_password = true;
@@ -103,6 +108,11 @@ std::string	Client::getNick() const
 std::string	Client::getUser() const
 {
 	return this->_user;
+}
+
+std::string	Client::getRealname() const
+{
+	return this->_realname;
 }
 
 bool	Client::getPassword() const

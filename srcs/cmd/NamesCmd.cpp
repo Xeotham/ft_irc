@@ -47,7 +47,7 @@ void NamesCmd::execute(int fd) {
 		this->sendAllNames(user, channels);
 }
 
-std::vector<std::string>	NamesCmd::splitData() {
+std::vector<std::string>	NamesCmd::splitData(){
 	std::vector<std::string>			channels;
 	std::stringstream					storage(_data);
 	std::string							segment;

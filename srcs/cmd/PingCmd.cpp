@@ -14,5 +14,7 @@ PingCmd &PingCmd::operator=(const PingCmd &other)
 }
 
 void PingCmd::execute(int fd) {
+	if (_data.empty())
+		throw Error(fd, Client::getClientByFd(*_user_lst, fd), ERR_NOORIGIN, NOORIGIN_MSG);
 	Messages::sendServMsg(fd, SERVER_NAME + " :" + _data, "PONG");
 }

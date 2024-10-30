@@ -7,12 +7,11 @@ class ACommand {
 	public:
 		ACommand(const ACommand &other);
 		ACommand(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
-
 		virtual ~ACommand();
 	public:
 		ACommand &operator=(const ACommand &other);
 	public:
-		static ACommand	*cmdSelector(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		static ACommand	*cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		virtual void	execute(int fd) = 0;
 	protected:
 		UserLst		*_user_lst;
@@ -20,6 +19,8 @@ class ACommand {
 		std::string	_data;
 	protected:
 		ACommand();
+	private:
+
 	private:
 		enum e_cmd {
 			CMD_PRIVMSG,
