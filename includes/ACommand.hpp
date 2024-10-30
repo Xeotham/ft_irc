@@ -28,7 +28,9 @@ class ACommand {
 			CMD_NICK,
 			CMD_USER,
 			CMD_BOT,
-			CMD_QUIT
+			CMD_QUIT,
+			CMD_WHO,
+			CMD_PING,
 		};
 };
 

@@ -90,3 +90,13 @@ bool	Channel::isUserInChannel(Channel &channel, const Client &user) {
 	}
 	return (false);
 }
+
+void	Channel::removeChannelFromLst(ChannelLst &channels_lst, const Channel &channel) {
+	for (ChannelLst::iterator it = channels_lst.begin(); it != channels_lst.end(); it++) {
+		if (it->getName() == channel.getName()) {
+			channels_lst.erase(it);
+			return ;
+		}
+	}
+	throw (std::invalid_argument("Channel not found."));
+}

@@ -24,6 +24,7 @@ class Channel {
 	public:
 		static Channel	&getChannelByName(ChannelLst &lst, const std::string &name);
 		static bool		isUserInChannel(Channel &channel, const Client &user);
+		static void		removeChannelFromLst(ChannelLst &channels_lst, const Channel &channel);
 	private:
 		Channel();
 	private:

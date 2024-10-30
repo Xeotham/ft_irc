@@ -15,7 +15,8 @@ class PartCmd : public ACommand {
 	private:
 		PartCmd();
 	private:
-		std::vector<std::string> splitData();
+		void						exitChannel(Client &user, Channel &chan, const std::string &msg);
+		std::vector<std::string>	splitData();
 };
 
 #endif

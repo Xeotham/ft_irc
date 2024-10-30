@@ -98,16 +98,19 @@ bool	Server::checkData(int fd, const std::string &data)
 
 	while (std::getline(storage, segment, '\n') && !segment.empty()) {
 		if (segment.find('\r') != std::string::npos)
-			segment.resize(segment.size() - 1);
+			segment.erase(segment.find('\r'));
+		if (segment[0] == 0)
+			continue ;
 		if (!user.getPassword() && segment.find("PASS") != std::string::npos
 			&& !passCheck(fd, segment.substr(5)))
 				return false;
 		try {
-			cmd = 	ACommand::cmdSelector(this->_clients, this->_channels, segment);
+			cmd = ACommand::cmdSelector(this->_clients, this->_channels, segment);
 			cmd->execute(fd);
 			delete cmd;
 		}
 		catch (bool b) {
+			this->clearClients(fd);
 			return (b);
 		}
 		catch (std::exception &e) {

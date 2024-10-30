@@ -4,12 +4,23 @@
 # include "Params.hpp"
 # include "Client.hpp"
 
-# define MSG "PRIVMSG"
-# define JOIN "JOIN"
-# define PART "PART"
-# define NICK "NICK"
-# define USER "USER"
-# define KICK "KICK"
+# define MSG			"PRIVMSG"
+# define JOIN			"JOIN"
+# define PART			"PART"
+# define NICK			"NICK"
+# define USER			"USER"
+# define KICK			"KICK"
+# define WHO			"WHO"
+# define QUIT			"QUIT"
+# define BOT_CMD		"bot"
+# define PING			"PING"
+# define END_OF_ARRAY	""
+
+
+# define WHOREPLY	"352"
+# define ENDOFWHO	"315"
+# define NAMREPLY	"353"
+# define ENDOFNAMES	"366"
 
 class	Client;
 
