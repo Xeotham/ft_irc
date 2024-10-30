@@ -172,7 +172,7 @@ const std::string	Channel::getModes() const{
 }
 
 bool	Channel::isExistingMode(const char c) const{
-	const std::string	existing_modes = "itkol";
+	const std::string	existing_modes = "itkol+-";
 	if (existing_modes.find(c) != std::string::npos)
 		return (true);
 	else

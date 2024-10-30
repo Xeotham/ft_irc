@@ -25,7 +25,7 @@ void	ModeCmd::execute(int fd)
 	std::string			last_param;
 	std::string			arg;
 	std::stringstream	ss;
-	bool				enable;
+	bool				enable = true;
 
 	std::istringstream iss(_data);
     std::getline(iss, channel, ' ');
@@ -50,15 +50,10 @@ void	ModeCmd::execute(int fd)
 	if (!Channel::isOperatorInChannel(*target_channel, sender)){
 		Messages::sendServMsg(fd, channel + " :You're not channel operator", "482 " + sender.getNick()); return ;}
 
-	if (mode[0] == '-')
-		enable = false;
-	else
-		enable = true;
-
-	if (mode[0] == '-' || mode[0] == '+')
-		mode.erase(0, 1);
-
 	getNextWord(last_param, arg);
+
+	std::cout << "THE MODE LINE IS: " << mode << std::endl;
+
 
 	for (std::string::size_type i = 0; i != mode.size(); ++i){
 		char	c = mode[i];
@@ -81,6 +76,12 @@ void	ModeCmd::execute(int fd)
 				break ;
 			case 'l':
 				lMode(target_channel, enable, arg, sender);
+				break ;
+			case '+' :
+				enable = true;
+				break ;
+			case '-' :
+				enable = false;
 		}
 
 		if (c == 'k' || c == 'o' || c == 'l'){
