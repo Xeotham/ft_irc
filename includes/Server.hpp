@@ -5,17 +5,18 @@
 # include "Client.hpp"
 # include "Bot.hpp"
 # include "Channel.hpp"
+# include "Colors.hpp"
 
 class Server
 {
 	private:
 		int							_port;
+		std::string					_password;
 		int							_serverSocketFd;
-		UserLst				 		_clients;
 		std::vector<struct pollfd>	_fds;
+		UserLst				 		_clients;
 		ChannelLst					_channels;
 		static bool					_signal;
-		std::string					_password;
 
 		void		serverSocket();
 

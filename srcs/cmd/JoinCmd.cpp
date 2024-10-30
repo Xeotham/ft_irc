@@ -31,10 +31,10 @@ void	JoinCmd::createJoinChannel(Client &user, const std::pair<std::string, std::
 	Channel chan(data.first, data.second);
 	std::cout << "When channel created " << chan.getName() << " & " << chan.getPassword() << std::endl;
 	chan.addUser(user);
+	chan.addOperator(user);
 	user.addChannel(chan);
 	_chan_lst->push_back(chan);
 }
-
 
 void	JoinCmd::joinOneChannel(Client &user, const std::pair<std::string, std::string> &data)
 {
@@ -52,7 +52,6 @@ void	JoinCmd::joinOneChannel(Client &user, const std::pair<std::string, std::str
 		}
 	}
 }
-
 
 void JoinCmd::execute(int fd) {
 	Client &user = Client::getClientByFd(*_user_lst, fd);

@@ -5,6 +5,7 @@
 
 Channel::Channel() {
 	this->_name = "";
+	this->_topic = "";
 }
 
 Channel::Channel(const std::string &name) {
@@ -12,6 +13,7 @@ Channel::Channel(const std::string &name) {
 		|| name.find_first_of(" ,\007:") != std::string::npos)
 		throw (std::invalid_argument("Invalid channel name."));
 	this->_name = name;
+	this->_topic = "";
 }
 
 Channel::Channel(const std::string &name, const std::string &pwd) {
@@ -33,6 +35,8 @@ Channel &Channel::operator=(const Channel &other) {
 	this->_name = other._name;
 	this->_users = other._users;
 	this->_password = other._password;
+	this->_operators = other._operators;
+	this->_topic = other._topic;
 	return (*this);
 }
 
@@ -56,6 +60,14 @@ void Channel::addUser(Client &user) {
 	this->_users.push_back(user);
 }
 
+void	Channel::addOperator(Client& user){
+	for (UserLst::iterator it = this->_operators.begin(); it != this->_operators.end(); it++) {
+		if (it->getFd() == user.getFd())
+			throw (std::invalid_argument("The user: " + this->getName() + "is already an operator in the channel."));
+	}
+	this->_operators.push_back(user);
+}
+
 void Channel::removeUser(const Client &user) {
 	for (UserLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
 		if (it->getFd() == user.getFd()) {
@@ -66,6 +78,10 @@ void Channel::removeUser(const Client &user) {
 	throw (std::invalid_argument("The user is not in the channel."));
 }
 
+UserLst&	Channel::getOperators(){
+	return (this->_operators);
+}
+
 std::vector<Client> &Channel::getUsers() {
 	return (this->_users);
 }
@@ -74,7 +90,7 @@ const std::string &Channel::getPassword() const {
 	return (this->_password);
 }
 
-Channel &Channel::getChannelByName(std::vector<Channel> &lst, const std::string &name) {
+Channel &Channel::getChannelByName(ChannelLst &lst, const std::string &name) {
 	for (ChannelLst::iterator it = lst.begin(); it != lst.end(); it++) {
 		if (it->getName() == name) {
 			return (*it);
@@ -83,10 +99,65 @@ Channel &Channel::getChannelByName(std::vector<Channel> &lst, const std::string 
 	throw (std::invalid_argument("Channel not found."));
 }
 
+Channel *Channel::getChannelByNamePt(ChannelLst &lst, const std::string &name) {
+	for (ChannelLst::iterator it = lst.begin(); it != lst.end(); it++) {
+		if (it->getName() == name) {
+			return (&(*it));
+		}
+	}
+	return (NULL);
+}
+
 bool	Channel::isUserInChannel(Channel &channel, const Client &user) {
 	for (UserLst::const_iterator it = channel.getUsers().begin(); it != channel.getUsers().end(); it++) {
 		if (it->getFd() == user.getFd())
 			return (true);
 	}
 	return (false);
+}
+
+bool	Channel::isOperatorInChannel(Channel &channel, const Client &user){
+	for (UserLst::const_iterator it = channel.getOperators().begin(); it != channel.getOperators().end(); it++) {
+		if (it->getFd() == user.getFd())
+			return (true);
+	}
+	return (false);
+}
+
+const std::string &Channel::getTopic() const {
+	return (this->_topic);
+}
+
+void Channel::setTopic(const std::string &topic) {
+	this->_topic = topic;
+}
+
+void	Channel::setMode(const char mode, const bool enable){
+	if (enable)
+		_modes.insert(mode);
+	else
+		_modes.erase(mode);
+}
+
+bool	Channel::isModeSet(const char mode) const{
+	if (_modes.find(mode) != _modes.end())
+		return (true);
+	else
+		return (false);
+}
+
+const std::string	Channel::getModes() const{
+	std::string modes;
+	for (std::set<char>::iterator it = _modes.begin(); it != _modes.end(); ++it) {
+		modes += *it;
+	}
+	return (modes);
+}
+
+bool	Channel::isExistingMode(const char c) const{
+	const std::string	existing_modes = "itkol";
+	if (existing_modes.find(c) != std::string::npos)
+		return (true);
+	else
+		return (false);
 }

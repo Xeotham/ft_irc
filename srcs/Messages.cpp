@@ -16,13 +16,17 @@ Messages	&Messages::operator=(const Messages &ref)
 	return *this;
 }
 
-Messages::~Messages()
-{
-}
+Messages::~Messages(){}
 
 void	Messages::sendMsg(int fd, const std::string &msg, const Client &sender, const std::string &type)
 {
 	std::string	message = ":" + sender.getNick() + "!" + sender.getUser() + "@localhost " + type + " " + msg + "\r\n";
 	std::cout << "Messages: " << message << std::endl;
 	send(fd, message.c_str(), message.size(), 0);
+}
+
+void	Messages::sendGlobalMsg(UserLst& users, const std::string &msg, const Client &sender, const std::string &type)
+{
+	for (UserLst::iterator it = users.begin(); it != users.end(); ++it)
+		sendMsg(it->getFd(), msg, sender, type);
 }

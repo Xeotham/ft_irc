@@ -4,6 +4,9 @@
 #include <PartCmd.hpp>
 #include <NickCmd.hpp>
 #include <UserCmd.hpp>
+#include "KickCmd.hpp"
+#include "TopicCmd.hpp"
+#include "ModeCmd.hpp"
 #include <Bot.hpp>
 
 ACommand::ACommand() : _user_lst(NULL), _chan_lst(NULL) {}
@@ -24,7 +27,7 @@ ACommand &ACommand::operator=(const ACommand &other) {
 
 ACommand *ACommand::cmdSelector(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) {
 	size_t						i = 0;
-	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER, "bot", "QUIT", ""};
+	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER,"bot", "QUIT", ""};
 	std::string					new_data;
 
 	while (!cmds[i].empty() && data.find(cmds[i].c_str(), 0, cmds[i].size()) == std::string::npos)
@@ -43,6 +46,12 @@ ACommand *ACommand::cmdSelector(UserLst &user_lst, ChannelLst &chan_lst, const s
 			return (new UserCmd(user_lst, chan_lst, new_data));
 		case CMD_BOT:
 			return (new Bot(user_lst, chan_lst, new_data));
+		case CMD_KICK:
+			return (new KickCmd(user_lst, chan_lst, new_data));
+		case CMD_TOPIC:
+			return (new TopicCmd(user_lst, chan_lst, new_data));
+		case CMD_MODE:
+			return (new ModeCmd(user_lst, chan_lst, new_data));
 		case CMD_QUIT:
 			throw (false);
 		default:

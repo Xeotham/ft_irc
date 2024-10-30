@@ -20,7 +20,7 @@ class Client
 		void	setUser(const std::string &user);
 		void	setPassword();
 		void	setBuffer(const std::string &buffer);
-		void	addChannel(const Channel &channel);
+		void	addChannel(const Channel channel);
 		void	removeChannel(const Channel &channel);
 
 		int							getFd() const;
@@ -31,6 +31,7 @@ class Client
 		bool						getPassword() const;
 		ChannelLst					&getChannels();
 		static Client				&getClientByFd(UserLst &lst, int fd);
+		static Client				&getClientByNick(UserLst &lst, std::string& nick);
 		static bool					isClientInList(UserLst &lst, const std::string &nick);
 	private:
 		int			_fd;

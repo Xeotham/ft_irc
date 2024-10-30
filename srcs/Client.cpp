@@ -75,7 +75,7 @@ void	Client::setBuffer(const std::string &buffer)
 	this->_buffer = buffer;
 }
 
-void	Client::addChannel(const Channel &channel)
+void	Client::addChannel(const Channel channel)
 {
 	this->_channels.push_back(channel);
 }
@@ -124,6 +124,16 @@ Client	&Client::getClientByFd(UserLst &lst, int fd)
 {
 	for (std::vector<Client>::iterator it = lst.begin(); it != lst.end(); it++) {
 		if (it->getFd() == fd) {
+			return (*it);
+		}
+	}
+	throw (std::invalid_argument("Client not found."));
+}
+
+Client &Client::getClientByNick(UserLst &lst, std::string& nick)
+{
+	for (std::vector<Client>::iterator it = lst.begin(); it != lst.end(); it++) {
+		if (it->getNick() == nick) {
 			return (*it);
 		}
 	}
