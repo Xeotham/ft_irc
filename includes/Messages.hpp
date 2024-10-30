@@ -28,8 +28,8 @@ class	Messages
 {
 	public:
 		static void	sendMsg(int fd, const std::string &msg, const Client &sender, const std::string &type);
-		static void sendGlobalMsg(UserLst& users, const std::string &msg, const Client &sender, const std::string &type);
 		static void	sendServMsg(int fd, const std::string &msg, const std::string &type);
+		static void sendGlobalMsg(UserLst& users, const std::string &msg, const Client &sender, const std::string &type);
 	private:
 		Messages();
 		Messages(const Messages &ref);

@@ -8,6 +8,7 @@
 #include "KickCmd.hpp"
 #include "TopicCmd.hpp"
 #include "ModeCmd.hpp"
+#include "InviteCmd.hpp"
 #include <Bot.hpp>
 #include <PingCmd.hpp>
 
@@ -29,7 +30,7 @@ ACommand &ACommand::operator=(const ACommand &other) {
 
 ACommand *ACommand::cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) {
 	size_t						i = 0;
-	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER, BOT_CMD, QUIT, WHO, PING ,END_OF_ARRAY};
+	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER, BOT_CMD, WHO, PING, KICK, "TOPIC", "MODE", "INVITE", QUIT,END_OF_ARRAY};
 	std::string					new_data;
 
 	while (!cmds[i].empty() && data.find(cmds[i].c_str(), 0, cmds[i].size()) == std::string::npos)
@@ -58,6 +59,8 @@ ACommand *ACommand::cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst,
 			return (new TopicCmd(user_lst, chan_lst, new_data));
 		case CMD_MODE:
 			return (new ModeCmd(user_lst, chan_lst, new_data));
+		case CMD_INVITE:
+			return (new InviteCmd(user_lst, chan_lst, new_data));
 		case CMD_QUIT:
 			throw (false);
 		default:

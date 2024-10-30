@@ -43,7 +43,7 @@ void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string
 
 }
 
-void	JoinCmd::createJoinChannel(Client &user, const std::pair<std::string, std::string> &data) {
+void	JoinCmd::createJoinChannel(Client user, const std::pair<std::string, std::string> &data) {
 	std::cout << "When creating Channel " << data.first << " & " << data.second << std::endl;
 	Channel chan(data.first, data.second);
 	std::cout << "When channel created " << chan.getName() << " & " << chan.getPassword() << std::endl;
@@ -117,7 +117,8 @@ std::map<std::string, std::string>	JoinCmd::splitData(int fd) {
 		break ;
 	}
 	if (iter == channels.begin()) {
-		throw Error(fd,Client::getClientByFd(*_user_lst, fd), ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(*iter));
+		channels_mdp.insert(std::make_pair("invalid", ""));
+		return (channels_mdp);
 	}
 	for (std::vector<std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
 		if (it->at(0) != '#')

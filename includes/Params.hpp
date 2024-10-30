@@ -4,6 +4,8 @@
 class Channel;
 class Client;
 
+# define SERVER_NAME std::string("IRC")
+
 # include <vector>
 
 typedef std::vector<Client> UserLst;

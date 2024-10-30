@@ -34,6 +34,7 @@ class ACommand {
 			CMD_KICK,
 			CMD_TOPIC,
 			CMD_MODE,
+			CMD_INVITE,
 			CMD_QUIT
 		};
 };
