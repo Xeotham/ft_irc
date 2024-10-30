@@ -11,6 +11,10 @@ SRCS = 	main.cpp \
 		cmd/ACommand.cpp \
 		cmd/PrivMsgCmd.cpp \
 		cmd/NickCmd.cpp \
+		cmd/UserCmd.cpp \
+		cmd/WhoCmd.cpp \
+		cmd/PingCmd.cpp \
+		cmd/NamesCmd.cpp \
 		cmd/KickCmd.cpp \
 		cmd/TopicCmd.cpp \
 		cmd/ModeCmd.cpp \

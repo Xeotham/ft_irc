@@ -33,7 +33,7 @@ void	Messages::sendGlobalMsg(UserLst& users, const std::string &msg, const Clien
 
 void	Messages::sendServMsg(int fd, const std::string &msg, const std::string &type)
 {
-	std::string	message = ":localhost " + type + " " + msg + "\r\n";
+	std::string	message = ":" + SERVER_NAME + " " + type + " " + msg + "\r\n";
 	std::cout << "Messages: " << message << std::endl;
 	send(fd, message.c_str(), message.size(), 0);
 }

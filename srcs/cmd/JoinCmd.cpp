@@ -1,5 +1,7 @@
 #include <JoinCmd.hpp>
 #include <Channel.hpp>
+#include <NamesCmd.hpp>
+#include <PartCmd.hpp>
 
 JoinCmd::JoinCmd() : ACommand(){}
 
@@ -19,11 +21,18 @@ JoinCmd &JoinCmd::operator=(const JoinCmd &other) {
 
 void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string> &data) {
 	Channel &chan = Channel::getChannelByName(*_chan_lst, data.first);
+
 	std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
 	if (!chan.getPassword().empty() && chan.getPassword() != data.second)
 		throw (std::invalid_argument("Error : wrong password."));
 	chan.addUser(user);
 	user.addChannel(chan);
+	for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+		if (it->getNick() == user.getNick())
+			continue ;
+		Messages::sendMsg(it->getFd(), chan.getName(), user, JOIN);
+	}
+
 }
 
 void	JoinCmd::createJoinChannel(Client &user, const std::pair<std::string, std::string> &data) {
@@ -56,10 +65,15 @@ void	JoinCmd::joinOneChannel(Client &user, const std::pair<std::string, std::str
 void JoinCmd::execute(int fd) {
 	Client &user = Client::getClientByFd(*_user_lst, fd);
 	if (_data == "0") {
-		while (!user.getChannels().empty()) {
-			Messages::sendMsg(fd, user.getChannels().begin()->getName() + " leaving", user, PART);
-			user.removeChannel(*user.getChannels().begin());
+		std::string	part_param;
+		for (ChannelLst::iterator it = _chan_lst->begin(); it != _chan_lst->end(); it++) {
+			part_param += it->getName();
+			if (it + 1 != _chan_lst->end())
+				part_param += ",";
 		}
+		part_param += " :Leaving\r\n";
+		PartCmd part(*_user_lst, *_chan_lst, part_param);
+		part.execute(fd);
 		return ;
 	}
 	std::map<std::string, std::string>	channels = this->splitData();
@@ -68,9 +82,12 @@ void JoinCmd::execute(int fd) {
 		try {
 			this->joinOneChannel(user, *it);
 			Messages::sendMsg(fd, it->first, user, JOIN);
+			NamesCmd names(*_user_lst, *_chan_lst, it->first);
+			names.execute(fd);
+			// this->sendNames(user, Channel::getChannelByName(*_chan_lst, it->first));
 		}
 		catch (std::exception &e) {
-			Messages::sendServMsg(fd, JOIN, e.what());
+			Messages::sendServMsg(fd, e.what(), JOIN);
 		}
 	}
 }

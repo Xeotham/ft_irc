@@ -9,6 +9,7 @@ class Client;
 typedef std::vector<Client> UserLst;
 typedef std::vector<Channel> ChannelLst;
 
+
 # include <iostream>
 # include <sys/socket.h>
 # include <sys/types.h>
@@ -30,5 +31,6 @@ typedef std::vector<Channel> ChannelLst;
 # include "Channel.hpp"
 # include "Client.hpp"
 
+# define SERVER_NAME std::string("IRC")
 
-#endif //PARAMS_HPP
+#endif

@@ -15,6 +15,21 @@ PartCmd &PartCmd::operator=(const PartCmd &other) {
 	return (*this);
 }
 
+void	PartCmd::exitChannel(Client	&user, Channel &chan, const std::string &msg) {
+
+	if (Channel::isUserInChannel(chan, user)) {
+		for (UserLst::iterator iter = chan.getUsers().begin(); iter != chan.getUsers().end(); iter++) {
+			Messages::sendMsg(iter->getFd(), chan.getName() + " " + msg, user, PART);
+		}
+		chan.removeUser(user);
+		user.removeChannel(chan);
+		if (chan.getUsers().empty())
+			Channel::removeChannelFromLst(*_chan_lst, chan);
+	}
+	else
+		throw (std::invalid_argument("The user is not in the channel."));
+}
+
 void PartCmd::execute(int fd) {
 	std::vector<std::string>	channels = splitData();
 	std::string					msg = _data.substr(_data.find(':') + 1);
@@ -29,11 +44,7 @@ void PartCmd::execute(int fd) {
         }
         try {
         	Channel &chan = Channel::getChannelByName(*_chan_lst, *iter);
-			if (Channel::isUserInChannel(chan, user)) {
-				Messages::sendMsg(fd, *iter + " " + msg, user, PART);
-				chan.removeUser(user);
-                user.removeChannel(chan);
-			}
+			this->exitChannel(user, chan, msg);
 		}
 		catch (std::exception &e) {
 			std::string err_msg = user.getNick() + " is not in the " + *iter + " channel.\r\n";
