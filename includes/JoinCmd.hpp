@@ -20,7 +20,7 @@ class JoinCmd : public ACommand
 		void	createJoinChannel(Client user, const std::pair<std::string, std::string> &data);
 		void	joinChannel(Client &user, const std::pair<std::string, std::string> &data);
 		void	joinOneChannel(Client &user, const std::pair<std::string, std::string> &data);
-		std::map<std::string, std::string> splitData(int fd);
+		std::map<std::string, std::string> splitData();
 };
 
 #endif

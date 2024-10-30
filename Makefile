@@ -14,14 +14,11 @@ SRCS = 	main.cpp \
 		cmd/JoinCmd.cpp \
 		cmd/PartCmd.cpp \
 		cmd/KickCmd.cpp \
-		cmd/UserCmd.cpp \
 		cmd/ModeCmd.cpp \
 		cmd/ACommand.cpp \
 		cmd/NamesCmd.cpp \
 		cmd/TopicCmd.cpp \
-		cmd/ModeCmd.cpp \
 		cmd/InviteCmd.cpp \
-		cmd/UserCmd.cpp \
 		cmd/PrivMsgCmd.cpp
 
 SRCS_DIR = srcs/

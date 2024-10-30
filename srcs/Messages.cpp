@@ -37,10 +37,3 @@ void	Messages::sendGlobalMsg(UserLst& users, const std::string &msg, const Clien
 	for (UserLst::iterator it = users.begin(); it != users.end(); ++it)
 		sendMsg(it->getFd(), msg, sender, type);
 }
-
-void	Messages::sendServMsg(int fd, const std::string &msg, const std::string &type)
-{
-	std::string	message = ":" + SERVER_NAME + " " + type + " " + msg + "\r\n";
-	std::cout << "Messages: " << message << std::endl;
-	send(fd, message.c_str(), message.size(), 0);
-}

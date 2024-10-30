@@ -151,6 +151,16 @@ Client	&Client::getClientByNick(UserLst &lst, const std::string &nick)
 	throw (std::invalid_argument("Client not found."));
 }
 
+Client	*Client::getClientByNickPt(UserLst &lst, const std::string &nick)
+{
+	for (std::vector<Client>::iterator it = lst.begin(); it != lst.end(); it++) {
+		if (it->getNick() == nick) {
+			return (&(*it));
+		}
+	}
+	return (NULL);
+}
+
 Client	&Client::getClientByUser(UserLst &lst, const std::string &user)
 {
 	for (std::vector<Client>::iterator it = lst.begin(); it != lst.end(); it++) {

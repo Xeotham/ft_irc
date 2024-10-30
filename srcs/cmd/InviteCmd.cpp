@@ -21,7 +21,7 @@ void	InviteCmd::execute(int fd)
 		Messages::sendServMsg(fd, "INVITE :Not enough parameters", "461 " + sender.getNick()); return;}
 
 	Channel* target_channel = Channel::getChannelByNamePt(*_chan_lst, channel);
-	Client* invited_client = Client::getClientByNick(*_user_lst, user_name);
+	Client* invited_client = Client::getClientByNickPt(*_user_lst, user_name);
 
 	if (!target_channel) {
 		Messages::sendServMsg(fd, channel + " :No such channel", "403 " + sender.getNick()); return;}

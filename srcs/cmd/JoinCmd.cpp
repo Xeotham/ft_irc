@@ -87,7 +87,7 @@ void JoinCmd::execute(int fd) {
 		part.execute(fd);
 		return ;
 	}
-	std::map<std::string, std::string>	channels = this->splitData(fd);
+	std::map<std::string, std::string>	channels = this->splitData();
 	std::cout << user.getNick() << " try to join" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
 		try {
@@ -102,7 +102,7 @@ void JoinCmd::execute(int fd) {
 	}
 }
 
-std::map<std::string, std::string>	JoinCmd::splitData(int fd) {
+std::map<std::string, std::string>	JoinCmd::splitData() {
 	std::map<std::string, std::string>	channels_mdp;
 	std::vector<std::string>			channels;
 	std::stringstream					storage(_data);

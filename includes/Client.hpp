@@ -34,6 +34,7 @@ class Client
 		ChannelLst					&getChannels();
 		static Client				&getClientByFd(UserLst &lst, int fd);
 		static Client				&getClientByNick(UserLst &lst, const std::string &nick);
+		static Client				*getClientByNickPt(UserLst &lst, const std::string &nick);
 		static Client				&getClientByUser(UserLst &lst, const std::string &user);
 		static bool					isClientInList(UserLst &lst, const std::string &nick);
 	private:
