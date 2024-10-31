@@ -30,7 +30,8 @@ void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string
 			throw (std::invalid_argument("Error : not invited user."));		
 		if (chan.isModeSet('l') && chan.getUserLimit() == chan.getUsers().size())
 			throw (std::invalid_argument("Error : channel already full."));
-		chan.removeInvitedUser(user);
+		if (chan.isModeSet('i'))
+			chan.removeInvitedUser(user);
 		chan.addUser(user);
 		user.addChannel(chan);
 		for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
