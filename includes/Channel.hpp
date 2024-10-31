@@ -25,6 +25,7 @@ class Channel {
 		void					addInvitedUser(Client user);
 		void					removeUser(const Client& user);
 		void					removeOperator(const Client& user);
+		void					removeInvitedUser(const Client& user);
 		UserLst					&getUsers();
 		UserLst					&getOperators();
 		const std::string		&getName() const;

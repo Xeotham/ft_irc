@@ -33,7 +33,7 @@ void	TopicCmd::execute(int fd)
 	if (topic.empty()){
 		Messages::sendServMsg(fd, channel + " " + target_channel->getTopic(), "332 " + sender.getNick()); return ;}
 
-	if (!Channel::isOperatorInChannel(*target_channel, sender)){
+	if (!Channel::isOperatorInChannel(*target_channel, sender) && target_channel->isModeSet('t')){
 		Messages::sendServMsg(fd, channel + " :You're not channel operator", "482 " + sender.getNick()); return ;}
 
 	target_channel->setTopic(topic);

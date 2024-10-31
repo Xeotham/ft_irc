@@ -26,6 +26,11 @@ void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string
 		std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
 		if (!chan.getPassword().empty() && chan.getPassword() != data.second)
 			throw (std::invalid_argument("Error : wrong password."));
+		if (chan.isModeSet('i') && !Channel::isInvitedUserInChannel(chan, user))
+			throw (std::invalid_argument("Error : not invited user."));		
+		if (chan.isModeSet('l') && chan.getUserLimit() == chan.getUsers().size())
+			throw (std::invalid_argument("Error : channel already full."));
+		chan.removeInvitedUser(user);
 		chan.addUser(user);
 		user.addChannel(chan);
 		for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
@@ -36,9 +41,15 @@ void	JoinCmd::joinChannel(Client &user, const std::pair<std::string, std::string
 	}
 	catch (std::exception &e) {
 		if (std::string(e.what()) == "Channel not found.")
-			throw Error(user.getFd(),user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(data.first));
-		else
+			throw Error(user.getFd(), user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(data.first));
+		else if (std::string(e.what()) == "Error : wrong password.")
 			throw Error(user.getFd(), user, ERR_BADCHANNELKEY, BADCHANNELKEY_MSG(data.first));
+		else if (std::string(e.what()) == "Error : not invited user.")
+			throw Error(user.getFd(), user, ERR_INVITEONLYCHAN, ERR_INVITEONLYCHAN_MSG(data.first));
+		else if ((std::string(e.what()) == "Error : channel already full."))
+			throw Error(user.getFd(), user, ERR_CHANNELISFULL, ERR_CHANNELISFULL_MSG(data.first));
+		else
+			std::cout << "UNHANDLE ERROR" << std::endl; // to delete // maxime
 	}
 
 }
@@ -59,7 +70,7 @@ void	JoinCmd::joinOneChannel(Client &user, const std::pair<std::string, std::str
 	    this->joinChannel(user, data);
 	}
 	catch (Error &err) {
-		if (err.getType() == ERR_BADCHANNELKEY)
+		if (err.getType() == ERR_BADCHANNELKEY || err.getType() == ERR_INVITEONLYCHAN || err.getType() == ERR_CHANNELISFULL)
 			throw err;
 		try {
 	        this->createJoinChannel(user, data);

@@ -207,7 +207,6 @@ void Channel::addInvitedUser(Client user) {
 	this->_invited_users.push_back(user);
 }
 
-
 void	Channel::removeChannelFromLst(ChannelLst &channels_lst, const Channel &channel) {
 	for (ChannelLst::iterator it = channels_lst.begin(); it != channels_lst.end(); it++) {
 		if (it->getName() == channel.getName()) {
@@ -216,4 +215,14 @@ void	Channel::removeChannelFromLst(ChannelLst &channels_lst, const Channel &chan
 		}
 	}
 	throw (std::invalid_argument("Channel not found."));
+}
+
+void Channel::removeInvitedUser(const Client &user) {
+	for (UserLst::iterator it = this->_invited_users.begin(); it != this->_invited_users.end(); it++) {
+		if (it->getFd() == user.getFd()) {
+			this->_invited_users.erase(it);
+			return;
+		}
+	}
+	throw (std::invalid_argument("The user is not invited to the channel."));
 }
