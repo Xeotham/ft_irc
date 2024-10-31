@@ -65,7 +65,7 @@ void KickCmd::execute(int fd)
 			if (comment.empty())
 				Messages::sendGlobalMsg(target_channel.getUsers(), message + " :" + kicked_client.getNick(), user, "KICK");
 			else
-				Messages::sendGlobalMsg(target_channel.getUsers(), message + comment, user, "KICK");
+				Messages::sendGlobalMsg(target_channel.getUsers(), message + " " + comment, user, "KICK");
 			target_channel.removeUser(kicked_client);
 			kicked_client.removeChannel(target_channel);
 			break ;
