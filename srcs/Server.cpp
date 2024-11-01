@@ -123,9 +123,9 @@ std::cout << "Current channels:" << std::endl;
 for (ChannelLst::iterator itt = _channels.begin(); itt != _channels.end(); ++itt) 
 {
 	std::cout << GRN "Channel Name: " << itt->getName()<< CLR << std::endl;
-	UserLst &users = itt->getUsers();
-	for (UserLst::iterator aa = users.begin(); aa != users.end(); ++aa) {
-		std::cout << "	Client FD: " << aa->getFd() << ", IP: " << aa->getIpAdd() << std::endl;
+	UserPtrLst &users = itt->getUsers();
+	for (UserPtrLst::iterator aa = users.begin(); aa != users.end(); ++aa) {
+		std::cout << "	Client FD: " << (*aa)->getFd() << ", IP: " << (*aa)->getIpAdd() << std::endl;
 	}
 	UserLst &operators = itt->getOperators();
 	for (UserLst::iterator ittt = operators.begin(); ittt != operators.end(); ++ittt) {

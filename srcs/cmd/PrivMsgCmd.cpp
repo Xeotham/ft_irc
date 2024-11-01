@@ -24,10 +24,10 @@ void	PrivMsgCmd::sendMsgToChannel(const std::string &channel, const std::string 
 	try {
 		Channel	&chan = Channel::getChannelByName(*_chan_lst, channel);
 		if (Channel::isUserInChannel(chan, *_user)) {
-			for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-				if (it->getFd() != _user->getFd()) {
-					std::cout << "Client <" << _user->getFd() << "> send message to <" << it->getNick() << "> : " << _data << std::endl;
-					Messages::sendMsg(it->getFd(), channel + " :" + msg, *_user, MSG);
+			for (UserPtrLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+				if ((*it)->getFd() != _user->getFd()) {
+					std::cout << "Client <" << _user->getFd() << "> send message to <" << (*it)->getNick() << "> : " << _data << std::endl;
+					Messages::sendMsg((*it)->getFd(), channel + " :" + msg, *_user, MSG);
 				}
 			}
 		}

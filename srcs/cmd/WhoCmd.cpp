@@ -16,8 +16,8 @@ WhoCmd	&WhoCmd::operator=(const WhoCmd &other)
 }
 
 void	WhoCmd::sendData(int fd, Channel &chan) {
-	for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-		std::string	data = _user->getNick() + " " + chan.getName() + " " + it->getUser() + " localhost " + SERVER_NAME + " " + it->getNick() + " :0 " + it->getRealname();
+	for (UserPtrLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+		std::string	data = _user->getNick() + " " + chan.getName() + " " + (*it)->getUser() + " localhost " + SERVER_NAME + " " + (*it)->getNick() + " :0 " + (*it)->getRealname();
 		Messages::sendServMsg(fd, data, WHOREPLY);
 	}
 }

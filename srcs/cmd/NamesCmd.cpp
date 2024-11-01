@@ -16,10 +16,10 @@ NamesCmd &NamesCmd::operator=(const NamesCmd &other)
 void	NamesCmd::sendNames(Channel &chan) {
 	std::string	names = _user->getNick() + " = " + chan.getName() + " :";
 
-	for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-		if (Channel::isOperatorInChannel(chan, *it))
+	for (UserPtrLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+		if (Channel::isOperatorInChannel(chan, **it))
 			names += '@';
-		names += it->getNick();
+		names += (*it)->getNick();
 		if (it + 1 != chan.getUsers().end())
 			names += ' ';
 	}
