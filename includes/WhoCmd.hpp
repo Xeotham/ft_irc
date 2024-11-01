@@ -6,7 +6,7 @@
 class WhoCmd : public ACommand {
 	public:
 		WhoCmd(const WhoCmd &other);
-		WhoCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		WhoCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		~WhoCmd();
 	public:
 		WhoCmd &operator=(const WhoCmd &other);
@@ -15,8 +15,8 @@ class WhoCmd : public ACommand {
 	private:
 		WhoCmd();
 	private:
-		void	sendData(int fd, Client &user, Channel &chan);
-		void	sendData(int fd, Client &user, Client &target);
+		void	sendData(int fd, Channel &chan);
+		void	sendData(int fd, Client &target);
 };
 
 #endif

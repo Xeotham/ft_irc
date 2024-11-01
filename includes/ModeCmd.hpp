@@ -14,7 +14,7 @@ class ModeCmd : public ACommand
 		void	lMode(Channel *target_channel, const bool enable, const std::string arg, Client &sender);
 		ModeCmd();
 	public:
-		ModeCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		ModeCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		virtual ~ModeCmd();
 	public:
 		void execute(int fd);

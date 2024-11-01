@@ -5,7 +5,7 @@ Bot::Bot(const Bot& other) : ACommand(other) {(void)other;}
 Bot& Bot::operator=(const Bot& other) {(void)other;	return *this;}
 Bot::~Bot() {}
 
-Bot::Bot(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data){}
+Bot::Bot(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user, user_lst, chan_lst, data){}
 
 
 void    Bot::sendCommand(int fd, Client &user)

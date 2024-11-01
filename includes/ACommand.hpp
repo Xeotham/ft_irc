@@ -6,7 +6,7 @@
 class ACommand {
 	public:
 		ACommand(const ACommand &other);
-		ACommand(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		ACommand(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		virtual ~ACommand();
 	public:
 		ACommand &operator=(const ACommand &other);
@@ -14,6 +14,7 @@ class ACommand {
 		static ACommand	*cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		virtual void	execute(int fd) = 0;
 	protected:
+		Client		*_user;
 		UserLst		*_user_lst;
 		ChannelLst	*_chan_lst;
 		std::string	_data;
@@ -35,7 +36,8 @@ class ACommand {
 			CMD_TOPIC,
 			CMD_MODE,
 			CMD_INVITE,
-			CMD_QUIT
+			CMD_CAP,
+			CMD_QUIT,
 		};
 };
 

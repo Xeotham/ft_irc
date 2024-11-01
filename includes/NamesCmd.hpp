@@ -5,7 +5,7 @@
 
 class NamesCmd : public ACommand {
 	public:
-		NamesCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		NamesCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		NamesCmd(const NamesCmd &other);
 		~NamesCmd();
 	public:
@@ -15,9 +15,9 @@ class NamesCmd : public ACommand {
 	private:
 		NamesCmd();
 	private:
-		void						sendAllNames(Client &user, ChannelLst &chan_lst);
-		void						sendAllNames(Client &user, std::vector<std::string> &chan_lst);
-		void						sendNames(Client &user, Channel &chan);
+		void						sendAllNames(ChannelLst &chan_lst);
+		void						sendAllNames(std::vector<std::string> &chan_lst);
+		void						sendNames(Channel &chan);
 		std::vector<std::string>	splitData();
 };
 

@@ -5,7 +5,7 @@
 
 class PingCmd : public ACommand {
 	public:
-		PingCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		PingCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		PingCmd(const PingCmd &other);
 		~PingCmd();
 	public:
