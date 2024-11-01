@@ -3,6 +3,8 @@
 #include <NamesCmd.hpp>
 #include <PartCmd.hpp>
 
+#include "TopicCmd.hpp"
+
 JoinCmd::JoinCmd() : ACommand(){}
 
 JoinCmd::JoinCmd(const JoinCmd &other) : ACommand(other) {
@@ -37,6 +39,8 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 		for (UserPtrLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
 			Messages::sendMsg((*it)->getFd(), chan.getName(), *_user, JOIN);
 		}
+		if (!chan.getTopic().empty())
+			Messages::sendServMsg(_user->getFd(), _user->getNick() + " " + chan.getName() + " " + chan.getTopic(), "332");
 	}
 	catch (std::exception &e) {
 		if (std::string(e.what()) == "Channel not found.")
@@ -108,6 +112,7 @@ void JoinCmd::execute(int fd) {
 		try {
 			this->joinOneChannel(*it);
 			NamesCmd names(*_user, *_user_lst, *_chan_lst, it->first);
+
 			names.execute(fd);
 		}
 		catch (Error &e) {
