@@ -74,8 +74,7 @@ void		Server::acceptNewClient()
 bool	Server::passCheck(int fd, std::string line)
 {
 	Client &user = Client::getClientByFd(_clients, fd);
-	if (line == "LS 302")
-		return true;
+
 	if (line != _password && !_password.empty())
 	{
 		std::string message = "Error : wrong password.\r\n";
@@ -97,13 +96,17 @@ bool	Server::checkData(int fd, const std::string &data)
 	const Client		&user = Client::getClientByFd(this->_clients, fd);
 
 	while (std::getline(storage, segment, '\n') && !segment.empty()) {
+		std::cout << segment << std::endl;
 		if (segment.find('\r') != std::string::npos)
 			segment.erase(segment.find('\r'));
 		if (segment[0] == 0)
 			continue ;
-		if (!user.getPassword() && segment.find("PASS") != std::string::npos
-			&& !passCheck(fd, segment.substr(5)))
-				return false;
+		if (!user.getPassword() && segment.find("PASS") != std::string::npos) {
+			if (!passCheck(fd, segment.substr(5)))
+				return (false);
+			else
+				continue;
+		}
 		try {
 			cmd = ACommand::cmdSelector(fd, this->_clients, this->_channels, segment);
 			cmd->execute(fd);
@@ -135,6 +138,8 @@ std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
 		catch (bool b) {
 			if (!b)
 				this->clearClients(fd);
+			else
+				continue ;
 			return (b);
 		}
 		catch (Error &e) {

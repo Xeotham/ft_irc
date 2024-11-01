@@ -6,7 +6,7 @@
 class UserCmd : public ACommand
 {
 	public:
-		UserCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		UserCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		UserCmd(const UserCmd &other);
 		~UserCmd();
 	public:

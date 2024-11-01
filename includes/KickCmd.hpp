@@ -9,7 +9,7 @@ class KickCmd : public ACommand
 	private:
 		KickCmd();
 	public:
-		KickCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		KickCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		virtual ~KickCmd();
 	public:
 		void execute(int fd);

@@ -5,7 +5,7 @@ PartCmd::PartCmd(const PartCmd &other) : ACommand(other) {
 	*this = other;
 }
 
-PartCmd::PartCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data) {}
+PartCmd::PartCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user, user_lst, chan_lst, data) {}
 
 PartCmd::~PartCmd() {}
 
@@ -15,51 +15,50 @@ PartCmd &PartCmd::operator=(const PartCmd &other) {
 	return (*this);
 }
 
-void	PartCmd::exitChannel(Client	&user, Channel &chan, const std::string &msg) {
+void	PartCmd::exitChannel(Channel &chan, const std::string &msg) {
 
-	if (Channel::isUserInChannel(chan, user)) {
+	if (Channel::isUserInChannel(chan, *_user)) {
 		for (UserLst::iterator iter = chan.getUsers().begin(); iter != chan.getUsers().end(); iter++) {
-			Messages::sendMsg(iter->getFd(), chan.getName() + " " + msg, user, PART);
+			Messages::sendMsg(iter->getFd(), chan.getName() + " " + msg, *_user, PART);
 		}
-		chan.removeUser(user);
-		user.removeChannel(chan);
+		chan.removeUser(*_user);
+		_user->removeChannel(chan);
 		if (chan.getUsers().empty())
 			Channel::removeChannelFromLst(*_chan_lst, chan);
 	}
 	else
-		throw (std::invalid_argument("The user is not in the channel."));
+		throw Error(_user->getFd(), *_user, ERR_NOTONCHANNEL, NOTONCHANNEL_MSG(chan.getName()));
 }
 
 void PartCmd::execute(int fd) {
-	Client						&user = Client::getClientByFd(*_user_lst, fd);
-
 	if (_data.empty())
-		throw Error(fd, user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("PART"));
+		throw Error(fd, *_user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("PART"));
 
-	std::vector<std::string>	channels = splitData(fd);
+	std::vector<std::string>	channels = splitData();
 	std::string					msg = _data.substr(_data.find(':') + 1);
 
 	for (std::vector<std::string>::iterator iter = channels.begin(); iter != channels.end(); iter++) {
         try {
         	Channel &chan = Channel::getChannelByName(*_chan_lst, *iter);
-			this->exitChannel(user, chan, msg);
+			this->exitChannel(chan, msg);
 		}
-		catch (std::exception &e) {
-			throw Error(fd, user, ERR_NOTONCHANNEL, NOTONCHANNEL_MSG(*iter));
+		catch (Error &e) {
+			e.sendError();
         }
 	}
 }
 
-std::vector<std::string>	PartCmd::splitData(int fd) {
+std::vector<std::string>	PartCmd::splitData() {
 	std::vector<std::string>			channels;
 	std::stringstream					storage(_data.substr(0, _data.find(':') - 1));
 	std::string							segment;
 
-	while (std::getline(storage, segment, ',') && !segment.empty())
+	while (std::getline(storage, segment, ',') && !segment.empty()) {
+		if (segment.at(0) != '#') {
+			Error(_user->getFd(), *_user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(segment)).sendError();
+			continue ;
+		}
 		channels.push_back(segment);
-	for (std::vector<std::string>::iterator iter = channels.begin(); iter != channels.end(); iter++) {
-		if (iter->at(0) != '#')
-			throw Error(fd,Client::getClientByFd(*_user_lst, fd), ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(*iter));
 	}
 	return (channels);
 }
