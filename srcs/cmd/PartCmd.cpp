@@ -22,6 +22,8 @@ void	PartCmd::exitChannel(Channel &chan, const std::string &msg) {
 			Messages::sendMsg((*iter)->getFd(), chan.getName() + " " + msg, *_user, PART);
 		}
 		chan.removeUser(*_user);
+		if (Channel::isOperatorInChannel(chan, *_user))
+			chan.removeOperator(*_user);
 		_user->removeChannel(chan);
 		if (chan.getUsers().empty())
 			Channel::removeChannelFromLst(*_chan_lst, chan);
