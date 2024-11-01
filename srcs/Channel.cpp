@@ -59,15 +59,15 @@ void Channel::setName(const std::string &name) {
 }
 
 // Other member functions
-void Channel::addUser(Client user) {
-	for (UserLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
-		if (it->getFd() == user.getFd())
+void Channel::addUser(Client &user) {
+	for (UserPtrLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
+		if ((*it)->getFd() == user.getFd())
 			throw (std::invalid_argument("The user is already in the " + this->getName() + " channel."));
 	}
-	this->_users.push_back(user);
+	this->_users.push_back(&user);
 }
 
-void	Channel::addOperator(Client user){
+void	Channel::addOperator(Client &user){
 	for (UserLst::iterator it = this->_operators.begin(); it != this->_operators.end(); it++) {
 		if (it->getFd() == user.getFd())
 			throw (std::invalid_argument("The user: " + this->getName() + "is already an operator in the channel."));
@@ -76,8 +76,8 @@ void	Channel::addOperator(Client user){
 }
 
 void Channel::removeUser(const Client &user) {
-	for (UserLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
-		if (it->getFd() == user.getFd()) {
+	for (UserPtrLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
+		if ((*it)->getFd() == user.getFd()) {
 			this->_users.erase(it);
 			return ;
 		}
@@ -99,7 +99,7 @@ UserLst&	Channel::getOperators(){
 	return (this->_operators);
 }
 
-std::vector<Client> &Channel::getUsers() {
+UserPtrLst &Channel::getUsers() {
 	return (this->_users);
 }
 
@@ -126,8 +126,8 @@ Channel *Channel::getChannelByNamePt(ChannelLst &lst, const std::string &name) {
 }
 
 bool	Channel::isUserInChannel(Channel &channel, const Client &user) {
-	for (UserLst::const_iterator it = channel.getUsers().begin(); it != channel.getUsers().end(); it++) {
-		if (it->getFd() == user.getFd())
+	for (UserPtrLst::const_iterator it = channel.getUsers().begin(); it != channel.getUsers().end(); it++) {
+		if ((*it) == &user)
 			return (true);
 	}
 	return (false);
@@ -199,7 +199,7 @@ bool	Channel::isInvitedUserInChannel(Channel &channel, const Client &user) {
 	return (false);
 }
 
-void Channel::addInvitedUser(Client user) {
+void Channel::addInvitedUser(Client &user) {
 	for (UserLst::iterator it = this->_invited_users.begin(); it != this->_invited_users.end(); it++) {
 		if (it->getFd() == user.getFd())
 			throw (std::invalid_argument("The user is already invited to the " + this->getName() + " channel."));
