@@ -80,9 +80,8 @@ bool	Server::passCheck(int fd, std::string line)
 	{
 		std::string message = "Error : wrong password.\r\n";
 		send(fd, message.c_str(), message.size(), 0);
-		std::cout << "Client <" << fd << "> disconnected." << std::endl;
 		close(fd);
-		clearClients(fd);
+		clearClients(_fds, _clients, fd);
 		return false;
 	}
 	user.setPassword();
@@ -101,81 +100,63 @@ bool	Server::checkData(int fd, const std::string &data)
 			segment.erase(segment.find('\r'));
 		if (segment[0] == 0)
 			continue ;
-		if (!user.getPassword() && segment.find("PASS") != std::string::npos
-			&& !passCheck(fd, segment.substr(5)))
+		if (segment.find("CAP LS 302") != std::string::npos)
+			continue ;
+		if (!user.getPassword())
+		{
+			if (!passCheck(fd, segment.substr(5)))
 				return false;
-		try {
+			else
+				continue ;
+		}
+		try
+		{
 			cmd = ACommand::cmdSelector(fd, this->_clients, this->_channels, segment);
 			cmd->execute(fd);
 			delete cmd;
 
 
-std::cout << RED "SERVER DATA:" CLR<< std::endl;
-std::cout << "Current clients:" << std::endl;
-for (UserLst::iterator it = _clients.begin(); it != _clients.end(); ++it) {
-	std::cout << "Client FD: " << it->getFd() << ", IP: " << it->getIpAdd() << std::endl;
-}
+			std::cout << RED "SERVER DATA:" CLR<< std::endl;
+			std::cout << "Current clients:" << std::endl;
+			for (UserLst::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+				std::cout << "Client FD: " << it->getFd() << ", IP: " << it->getIpAdd() << std::endl;
+			}
 
-std::cout << "Current channels:" << std::endl;
-for (ChannelLst::iterator itt = _channels.begin(); itt != _channels.end(); ++itt) 
-{
-	std::cout << GRN "Channel Name: " << itt->getName()<< CLR << std::endl;
-	UserLst &users = itt->getUsers();
-	for (UserLst::iterator aa = users.begin(); aa != users.end(); ++aa) {
-		std::cout << "	Client FD: " << aa->getFd() << ", IP: " << aa->getIpAdd() << std::endl;
-	}
-	UserLst &operators = itt->getOperators();
-	for (UserLst::iterator ittt = operators.begin(); ittt != operators.end(); ++ittt) {
-		std::cout << "	Operator FD: " << ittt->getFd() << ", IP: " << ittt->getIpAdd() << std::endl;
-	}
-}
-std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
+			std::cout << "Current channels:" << std::endl;
+			for (ChannelLst::iterator itt = _channels.begin(); itt != _channels.end(); ++itt)
+			{
+				std::cout << GRN "Channel Name: " << itt->getName()<< CLR << std::endl;
+				UserLst &users = itt->getUsers();
+				for (UserLst::iterator aa = users.begin(); aa != users.end(); ++aa) {
+					std::cout << "	Client FD: " << aa->getFd() << ", IP: " << aa->getIpAdd() << std::endl;
+				}
+				UserLst &operators = itt->getOperators();
+				for (UserLst::iterator ittt = operators.begin(); ittt != operators.end(); ++ittt) {
+					std::cout << "	Operator FD: " << ittt->getFd() << ", IP: " << ittt->getIpAdd() << std::endl;
+				}
+			}
+			std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
 
 		}
 		catch (bool b) {
 			if (!b)
-				this->clearClients(fd);
+				clearClients(_fds, _clients, fd);
 			return (b);
 		}
 		catch (Error &e) {
-			std::cout << "test" << std::endl;
 			if (cmd)
 				delete cmd;
+			if (e.getType() == ERR_NICKNAMEINUSE)
+			{
+				e.sendError();
+				close(fd);
+				clearClients(_fds, _clients, fd);
+				return false;
+			}
 			e.sendError();
 		}
 	}
 	return (true);
-	// if (data.find("PRIVMSG") != std::string::npos) {
-	// 	PrivMsgCmd	cmd;
-	// 	data.erase(0, 8);
-	// 	data.resize(data.size() - 2);
-	// 	cmd.execute(fd, data, this->_channels, this->_clients);
-	// }
-	// if (data.find("QUIT") != std::string::npos)
-	// 	return ;
-	// if (data.find("NICK") != std::string::npos) {
-	// 	// setNickCommand(fd, data.substr(5, data.size() - 2));
-	// 	NickCmd    cmd;
-	// 	data.erase(0, 5);
-	// 	data.resize(data.size() - 2);
-	// 	cmd.execute(fd, data, this->_channels, this->_clients);
-	// }
-	// if (data.find("USER") != std::string::npos)
-	// 	setUserCommand(fd, data);
-	// if (data.find("JOIN") != std::string::npos) {
-	// 	JoinCmd	cmd;
-	// 	data.erase(0, 5);
-	// 	data.resize(data.size() - 2);
-	// 	cmd.execute(fd, data, this->_channels, this->_clients);
-	// }
-	// if (data.find("bot") != std::string::npos)
-	// 	Bot::botCommand(fd, data, _clients);
-	// if (data.find("PART") != std::string::npos) {
-	// 	PartCmd	cmd;
-	// 	data.erase(0, 5);
-	// 	data.resize(data.size() - 2);
-	// 	cmd.execute(fd, data, this->_channels, this->_clients);
-	// }
 }
 
 void	Server::receiveNewData(int fd)
@@ -201,7 +182,6 @@ void	Server::receiveNewData(int fd)
 				_clients[i].setBuffer(_clients[i].getBuffer() + tmp + '\0');
 				if (_clients[i].getBuffer().find("\r\n") == std::string::npos)
 					return ;
-				std::cout << "Client " << fd << " > data : " << _clients[i].getBuffer() << std::endl;
 				if (checkData(fd, _clients[i].getBuffer()))
 					_clients[i].setBuffer("");
 			}
@@ -223,8 +203,9 @@ void	Server::closeFds()
 	}
 }
 
-void	Server::clearClients(int fd)
+void	Server::clearClients(std::vector<struct pollfd> &_fds, UserLst &_clients, int fd)
 {
+	std::cout << "Client <" << fd << "> disconnected." << std::endl << std::endl;
 	for (size_t i =	0; i < _fds.size(); i++)
 	{
 		if (_fds[i].fd == fd)
@@ -281,7 +262,6 @@ void	Server::serverInit()
 			throw (std::runtime_error("Error : poll() failed."));
 		for (size_t i = 0; i < _fds.size(); i++)
 		{
-			// std::cout << "i : " << i << " fds size : " << _fds.size() << std::endl;
 			if (_fds[i].revents & POLLIN)
 			{
 				if (_fds[i].fd == _serverSocketFd)
