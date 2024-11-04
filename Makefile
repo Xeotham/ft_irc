@@ -15,6 +15,7 @@ SRCS = 	main.cpp \
 		cmd/PartCmd.cpp \
 		cmd/KickCmd.cpp \
 		cmd/ModeCmd.cpp \
+		cmd/ListCmd.cpp \
 		cmd/ACommand.cpp \
 		cmd/NamesCmd.cpp \
 		cmd/TopicCmd.cpp \
