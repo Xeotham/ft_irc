@@ -28,12 +28,12 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 		std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
 		if (!chan.getPassword().empty() && chan.getPassword() != data.second)
 			throw (std::invalid_argument("Error : wrong password."));
-		if (chan.isModeSet('i') && !Channel::isInvitedUserInChannel(chan, user))
+		if (chan.isModeSet('i') && !Channel::isInvitedUserInChannel(chan, *_user))
 			throw (std::invalid_argument("Error : not invited user."));
 		if (chan.isModeSet('l') && chan.getUserLimit() == chan.getUsers().size())
 			throw (std::invalid_argument("Error : channel already full."));
 		if (chan.isModeSet('i'))
-			chan.removeInvitedUser(user);
+			chan.removeInvitedUser(*_user);
 		chan.addUser(*_user);
 		_user->addChannel(chan);
 		for (UserPtrLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
@@ -43,6 +43,7 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 			Messages::sendServMsg(_user->getFd(), _user->getNick() + " " + chan.getName() + " " + chan.getTopic(), "332");
 	}
 	catch (std::exception &e) {
+		std::cout << "Error : " << e.what() << std::endl;
 		if (std::string(e.what()) == "Channel not found.")
 			throw Error(_user->getFd(), *_user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(data.first));
 		else if (std::string(e.what()) == "Error : wrong password.")
@@ -54,6 +55,7 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 		else
 			std::cout << "UNHANDLE ERROR" << std::endl; // to delete // maxime	}
 
+	}
 }
 
 void	JoinCmd::createJoinChannel(const std::pair<std::string, std::string> &data) {
@@ -73,15 +75,12 @@ void	JoinCmd::joinOneChannel(const std::pair<std::string, std::string> &data)
 	    this->joinChannel(data);
 	}
 	catch (Error &err) {
-		if (err.getType() == ERR_BADCHANNELKEY) {
+		if (err.getType() != ERR_NOSUCHCHANNEL) {
 			err.sendError();
 			return ;
 		}
 		try {
 	        this->createJoinChannel(data);
-		}
-		catch (Error &err) {
-			err.sendError();
 		}
 		catch (std::exception &e) {
 			throw Error(_user->getFd(), *_user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(data.first));
