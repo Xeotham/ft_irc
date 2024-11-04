@@ -2,14 +2,14 @@
 
 ModeCmd::ModeCmd(){}
 
-ModeCmd::ModeCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data)
-	: ACommand(user_lst, chan_lst, data){}
+ModeCmd::ModeCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data)
+	: ACommand(user, user_lst, chan_lst, data){}
 
 ModeCmd::~ModeCmd(){}
 
 void getNextWord(std::string &source, std::string &destination) {
 	std::istringstream iss(source);
-	iss >> destination;                
+	iss >> destination;
 	std::getline(iss, source);
 	if (source.find(' ') == std::string::npos)
 		source.clear();
@@ -19,7 +19,7 @@ void getNextWord(std::string &source, std::string &destination) {
 
 void	ModeCmd::execute(int fd)
 {
-	Client& 			sender = Client::getClientByFd(*_user_lst, fd);
+	Client& 			sender = *_user;
 	std::string			channel;
 	std::string			mode;
 	std::string			last_param;

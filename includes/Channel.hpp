@@ -20,13 +20,13 @@ class Channel {
 		void					setMode(const char mode, const bool enable);
 		void 					setUserLimit(unsigned int limit);
 		void					setPassword(const std::string &password);
-		void					addUser(Client user);
-		void                    addOperator(Client user);
-		void					addInvitedUser(Client user);
+		void					addUser(Client &user);
+		void                    addOperator(Client &user);
+		void					addInvitedUser(Client &user);
 		void					removeUser(const Client& user);
 		void					removeOperator(const Client& user);
 		void					removeInvitedUser(const Client& user);
-		UserLst					&getUsers();
+		UserPtrLst				&getUsers();
 		UserLst					&getOperators();
 		const std::string		&getName() const;
 		const std::string		&getPassword() const;
@@ -51,7 +51,7 @@ class Channel {
 		std::set<char>	_modes;
 		UserLst			_invited_users;
 		UserLst			_operators;
-		UserLst			_users;
+		UserPtrLst		_users;
 		unsigned int	_user_limit;
 };
 

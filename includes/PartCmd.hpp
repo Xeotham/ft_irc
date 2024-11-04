@@ -5,7 +5,7 @@
 
 class PartCmd : public ACommand {
 	public:
-		PartCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		PartCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		PartCmd(const PartCmd &other);
 		virtual ~PartCmd();
 	public:
@@ -15,8 +15,8 @@ class PartCmd : public ACommand {
 	private:
 		PartCmd();
 	private:
-		void						exitChannel(Client &user, Channel &chan, const std::string &msg);
-		std::vector<std::string>	splitData(int fd);
+		void						exitChannel(Channel &chan, const std::string &msg);
+		std::vector<std::string>	splitData();
 };
 
 #endif

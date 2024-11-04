@@ -2,14 +2,14 @@
 
 TopicCmd::TopicCmd(){}
 
-TopicCmd::TopicCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data)
-	: ACommand(user_lst, chan_lst, data){}
+TopicCmd::TopicCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data)
+	: ACommand(user, user_lst, chan_lst, data){}
 
 TopicCmd::~TopicCmd(){}
 
 void	TopicCmd::execute(int fd)
 {
-	Client& 		sender = Client::getClientByFd(*_user_lst, fd);
+	Client& 		sender = *_user;
 	std::string		channel;
 	std::string		topic;
 

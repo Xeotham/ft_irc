@@ -1,6 +1,6 @@
 #include <PingCmd.hpp>
 
-PingCmd::PingCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user_lst, chan_lst, data){}
+PingCmd::PingCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user, user_lst, chan_lst, data){}
 
 PingCmd::PingCmd(const PingCmd &other) : ACommand(other){}
 
@@ -15,6 +15,6 @@ PingCmd &PingCmd::operator=(const PingCmd &other)
 
 void PingCmd::execute(int fd) {
 	if (_data.empty())
-		throw Error(fd, Client::getClientByFd(*_user_lst, fd), ERR_NOORIGIN, NOORIGIN_MSG);
+		throw Error(fd, *_user, ERR_NOORIGIN, NOORIGIN_MSG);
 	Messages::sendServMsg(fd, SERVER_NAME + " :" + _data, "PONG");
 }

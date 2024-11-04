@@ -6,7 +6,7 @@
 class NickCmd : public ACommand
 {
 	public:
-		NickCmd(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+		NickCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		NickCmd(const NickCmd &other);
 		~NickCmd();
 	public:
@@ -15,6 +15,8 @@ class NickCmd : public ACommand
 		void	execute(int fd);
 	private:
 		NickCmd();
+	private:
+		void	sendToEveryone();
 };
 
-#endif //NICKCMD_H
+#endif

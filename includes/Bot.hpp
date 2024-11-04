@@ -21,7 +21,7 @@ private:
 	void		sendPong(int fd, Client &user);
 
 public:
-	Bot(UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+	Bot(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 	~Bot();
 	void    execute(int fd);
 };
