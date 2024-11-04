@@ -76,8 +76,7 @@ void	JoinCmd::joinOneChannel(const std::pair<std::string, std::string> &data)
 	}
 	catch (Error &err) {
 		if (err.getType() != ERR_NOSUCHCHANNEL) {
-			err.sendError();
-			return ;
+			throw err;
 		}
 		try {
 	        this->createJoinChannel(data);
@@ -92,6 +91,7 @@ void JoinCmd::execute(int fd) {
 	if (_data.empty())
 		throw Error(fd, *_user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("JOIN"));
 	if (_data == "0") {
+		std::cout << "User " << _user->getNick() << " try to leave all channels" << std::endl;
 		std::string	part_param;
 		for (ChannelLst::iterator it = _chan_lst->begin(); it != _chan_lst->end(); it++) {
 			part_param += it->getName();

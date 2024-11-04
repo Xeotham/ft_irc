@@ -230,6 +230,9 @@ void	Server::closeFds()
 
 void	Server::clearClients(int fd)
 {
+	JoinCmd	cmd(Client::getClientByFd(_clients, fd), _clients, _channels, "0");
+
+	cmd.execute(fd);
 	for (size_t i =	0; i < _fds.size(); i++)
 	{
 		if (_fds[i].fd == fd)
