@@ -74,8 +74,7 @@ void		Server::acceptNewClient()
 bool	Server::passCheck(int fd, std::string line)
 {
 	Client &user = Client::getClientByFd(_clients, fd);
-	if (line == "LS 302")
-		return true;
+
 	if (line != _password && !_password.empty())
 	{
 		std::string message = "Error : wrong password.\r\n";
@@ -105,7 +104,7 @@ bool	Server::checkData(int fd, const std::string &data)
 		if (!user.getPassword())
 		{
 			if (!passCheck(fd, segment.substr(5)))
-				return false;
+				return (false);
 			else
 				continue ;
 		}
@@ -116,26 +115,26 @@ bool	Server::checkData(int fd, const std::string &data)
 			delete cmd;
 
 
-			std::cout << RED "SERVER DATA:" CLR<< std::endl;
-			std::cout << "Current clients:" << std::endl;
-			for (UserLst::iterator it = _clients.begin(); it != _clients.end(); ++it) {
-				std::cout << "Client FD: " << it->getFd() << ", IP: " << it->getIpAdd() << std::endl;
-			}
+std::cout << RED "SERVER DATA:" CLR<< std::endl;
+std::cout << "Current clients:" << std::endl;
+for (UserLst::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+	std::cout << "Client FD: " << it->getFd() << ", IP: " << it->getIpAdd() << std::endl;
+}
 
-			std::cout << "Current channels:" << std::endl;
-			for (ChannelLst::iterator itt = _channels.begin(); itt != _channels.end(); ++itt)
-			{
-				std::cout << GRN "Channel Name: " << itt->getName()<< CLR << std::endl;
-				UserLst &users = itt->getUsers();
-				for (UserLst::iterator aa = users.begin(); aa != users.end(); ++aa) {
-					std::cout << "	Client FD: " << aa->getFd() << ", IP: " << aa->getIpAdd() << std::endl;
-				}
-				UserLst &operators = itt->getOperators();
-				for (UserLst::iterator ittt = operators.begin(); ittt != operators.end(); ++ittt) {
-					std::cout << "	Operator FD: " << ittt->getFd() << ", IP: " << ittt->getIpAdd() << std::endl;
-				}
-			}
-			std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
+std::cout << "Current channels:" << std::endl;
+for (ChannelLst::iterator itt = _channels.begin(); itt != _channels.end(); ++itt) 
+{
+	std::cout << GRN "Channel Name: " << itt->getName()<< CLR << std::endl;
+	UserPtrLst &users = itt->getUsers();
+	for (UserPtrLst::iterator aa = users.begin(); aa != users.end(); ++aa) {
+		std::cout << "	Client FD: " << (*aa)->getFd() << ", IP: " << (*aa)->getIpAdd() << std::endl;
+	}
+	UserLst &operators = itt->getOperators();
+	for (UserLst::iterator ittt = operators.begin(); ittt != operators.end(); ++ittt) {
+		std::cout << "	Operator FD: " << ittt->getFd() << ", IP: " << ittt->getIpAdd() << std::endl;
+	}
+}
+std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
 
 		}
 		catch (bool b) {
@@ -166,13 +165,7 @@ void	Server::receiveNewData(int fd)
 	std::memset(tmp, 0,sizeof(tmp));
 
 	size_t data = recv(fd, tmp, sizeof(tmp) - 1, 0);
-	/*if (data <= 0)
-	{
-		std::cout << "Client " << fd << " disconnected." << std::endl;
-		clearClients(fd);
-		close(fd);
-		return ;
-	}*/
+
 	if (data > 0)
 	{
 		for (size_t i = 0; i < _clients.size(); i++)
@@ -182,6 +175,7 @@ void	Server::receiveNewData(int fd)
 				_clients[i].setBuffer(_clients[i].getBuffer() + tmp + '\0');
 				if (_clients[i].getBuffer().find("\r\n") == std::string::npos)
 					return ;
+				std::cout << "Client " << fd << " > data : " << _clients[i].getBuffer() << std::endl;
 				if (checkData(fd, _clients[i].getBuffer()))
 					_clients[i].setBuffer("");
 			}
@@ -205,8 +199,11 @@ void	Server::closeFds()
 
 void	Server::clearClients(std::vector<struct pollfd> &_fds, UserLst &_clients, int fd)
 {
+	JoinCmd	cmd(Client::getClientByFd(_clients, fd), _clients, _channels, "0");
+
+	cmd.execute(fd);
 	std::cout << "Client <" << fd << "> disconnected." << std::endl << std::endl;
-	for (size_t i =	0; i < _fds.size(); i++)
+	for (size_t i =    0; i < _fds.size(); i++)
 	{
 		if (_fds[i].fd == fd)
 		{

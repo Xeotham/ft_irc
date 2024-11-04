@@ -18,16 +18,19 @@ class Server
 		ChannelLst					_channels;
 		static bool					_signal;
 
-		void		serverSocket();
+		void			serverSocket();
 
-		void		acceptNewClient();
-		void		receiveNewData(int fd);
-		bool		checkData(int fd, const std::string &data);
-		bool		passCheck(int fd, std::string data);
+		void			acceptNewClient();
+		void			receiveNewData(int fd);
+		bool			checkData(int fd, const std::string &data);
 
-		static void		clearClients(std::vector<struct pollfd> &_fds, UserLst &_clients, int fd);
+		void			setNickCommand(int fd, std::string data);
+		void			setUserCommand(int fd, std::string data);
+		bool			passCheck(int fd, std::string data);
 
-		void		addChannel(const std::string &name);
+		static void		clearClients(int fd);
+
+		void			addChannel(const std::string &name);
 
 	public:
 		Server(int port, const std::string &password);
