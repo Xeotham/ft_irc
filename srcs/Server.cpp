@@ -79,9 +79,8 @@ bool	Server::passCheck(int fd, std::string line)
 	{
 		std::string message = "Error : wrong password.\r\n";
 		send(fd, message.c_str(), message.size(), 0);
-		std::cout << "Client <" << fd << "> disconnected." << std::endl;
 		close(fd);
-		clearClients(fd);
+		clearClients(_fds, _clients, fd);
 		return false;
 	}
 	user.setPassword();
@@ -101,7 +100,9 @@ bool	Server::checkData(int fd, const std::string &data)
 			segment.erase(segment.find('\r'));
 		if (segment[0] == 0)
 			continue ;
-		if (!user.getPassword() && segment.find("PASS") != std::string::npos) {
+		if (segment == "CAP LS 302")
+			continue ;
+		if (!user.getPassword()) {
 			if (!passCheck(fd, segment.substr(5)))
 				return (false);
 			else
@@ -150,37 +151,6 @@ std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
 		}
 	}
 	return (true);
-	// if (data.find("PRIVMSG") != std::string::npos) {
-	// 	PrivMsgCmd	cmd;
-	// 	data.erase(0, 8);
-	// 	data.resize(data.size() - 2);
-	// 	cmd.execute(fd, data, this->_channels, this->_clients);
-	// }
-	// if (data.find("QUIT") != std::string::npos)
-	// 	return ;
-	// if (data.find("NICK") != std::string::npos) {
-	// 	// setNickCommand(fd, data.substr(5, data.size() - 2));
-	// 	NickCmd    cmd;
-	// 	data.erase(0, 5);
-	// 	data.resize(data.size() - 2);
-	// 	cmd.execute(fd, data, this->_channels, this->_clients);
-	// }
-	// if (data.find("USER") != std::string::npos)
-	// 	setUserCommand(fd, data);
-	// if (data.find("JOIN") != std::string::npos) {
-	// 	JoinCmd	cmd;
-	// 	data.erase(0, 5);
-	// 	data.resize(data.size() - 2);
-	// 	cmd.execute(fd, data, this->_channels, this->_clients);
-	// }
-	// if (data.find("bot") != std::string::npos)
-	// 	Bot::botCommand(fd, data, _clients);
-	// if (data.find("PART") != std::string::npos) {
-	// 	PartCmd	cmd;
-	// 	data.erase(0, 5);
-	// 	data.resize(data.size() - 2);
-	// 	cmd.execute(fd, data, this->_channels, this->_clients);
-	// }
 }
 
 void	Server::receiveNewData(int fd)
@@ -190,13 +160,7 @@ void	Server::receiveNewData(int fd)
 	std::memset(tmp, 0,sizeof(tmp));
 
 	size_t data = recv(fd, tmp, sizeof(tmp) - 1, 0);
-	/*if (data <= 0)
-	{
-		std::cout << "Client " << fd << " disconnected." << std::endl;
-		clearClients(fd);
-		close(fd);
-		return ;
-	}*/
+
 	if (data > 0)
 	{
 		for (size_t i = 0; i < _clients.size(); i++)
@@ -228,12 +192,13 @@ void	Server::closeFds()
 	}
 }
 
-void	Server::clearClients(int fd)
+void    Server::clearClients(std::vector<struct pollfd> &_fds, UserLst &_clients, int fd)
 {
 	JoinCmd	cmd(Client::getClientByFd(_clients, fd), _clients, _channels, "0");
 
 	cmd.execute(fd);
-	for (size_t i =	0; i < _fds.size(); i++)
+	std::cout << "Client <" << fd << "> disconnected." << std::endl << std::endl;
+	for (size_t i =    0; i < _fds.size(); i++)
 	{
 		if (_fds[i].fd == fd)
 		{
@@ -241,7 +206,7 @@ void	Server::clearClients(int fd)
 			break;
 		}
 	}
-	for (size_t i =	0; i < _clients.size(); i++)
+	for (size_t i =    0; i < _clients.size(); i++)
 	{
 		if (_clients[i].getFd() == fd)
 		{
