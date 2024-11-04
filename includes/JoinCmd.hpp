@@ -9,7 +9,7 @@ class JoinCmd : public ACommand
 	public:
 		JoinCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
 		JoinCmd(const JoinCmd &other);
-		virtual ~JoinCmd();
+		~JoinCmd();
 	public:
         JoinCmd &operator=(const JoinCmd &other);
     public:

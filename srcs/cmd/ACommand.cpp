@@ -11,6 +11,8 @@
 #include "InviteCmd.hpp"
 #include <Bot.hpp>
 #include <PingCmd.hpp>
+#include <ListCmd.hpp>
+#include <NamesCmd.hpp>
 
 ACommand::ACommand() : _user(NULL), _user_lst(NULL), _chan_lst(NULL) {}
 
@@ -30,13 +32,15 @@ ACommand &ACommand::operator=(const ACommand &other) {
 
 ACommand *ACommand::cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) {
 	size_t						i = 0;
-	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER, BOT_CMD, WHO, PING, "KICK", "TOPIC", "MODE" , "INVITE", "CAP LS", QUIT,END_OF_ARRAY};
+	static const std::string	cmds[] = {MSG, JOIN, PART, NICK, USER, BOT_CMD, WHO, PING, KICK, TOPIC, MODE , INVITE, CAP, NAMES, LIST, QUIT,END_OF_ARRAY};
 	std::string					new_data;
 	Client						&user = Client::getClientByFd(user_lst, fd);
 
 	while (!cmds[i].empty() && data.find(cmds[i].c_str(), 0, cmds[i].size()) == std::string::npos)
 		i++;
-	new_data = data.substr(cmds[i].size() + 1);
+	new_data = data.substr(cmds[i].size());
+	if (!new_data.empty())
+		new_data.erase(0, 1);
 	switch (i) {
 		case CMD_PRIVMSG:
 			return (new PrivMsgCmd(user, user_lst, chan_lst, new_data));
@@ -62,6 +66,10 @@ ACommand *ACommand::cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst,
 			return (new ModeCmd(user, user_lst, chan_lst, new_data));
 		case CMD_INVITE:
 			return (new InviteCmd(user, user_lst, chan_lst, new_data));
+		case CMD_NAMES:
+			return (new NamesCmd(user, user_lst, chan_lst, new_data));
+		case CMD_LIST:
+			return (new ListCmd(user, user_lst, chan_lst, new_data));
 		case CMD_CAP:
 			throw (true);
 		case CMD_QUIT:

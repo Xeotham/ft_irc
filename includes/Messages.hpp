@@ -14,6 +14,13 @@
 # define QUIT			"QUIT"
 # define BOT_CMD		"bot"
 # define PING			"PING"
+# define KICK			"KICK"
+# define TOPIC			"TOPIC"
+# define MODE			"MODE"
+# define INVITE			"INVITE"
+# define CAP			"CAP"
+# define NAMES			"NAMES"
+# define LIST			"LIST"
 # define END_OF_ARRAY	""
 
 
@@ -21,6 +28,9 @@
 # define ENDOFWHO	"315"
 # define NAMREPLY	"353"
 # define ENDOFNAMES	"366"
+# define LISTSTART	"321"
+# define LIST_RPL	"322"
+# define LISTEND	"323"
 
 class	Client;
 

@@ -37,6 +37,8 @@ class ACommand {
 			CMD_MODE,
 			CMD_INVITE,
 			CMD_CAP,
+			CMD_NAMES,
+			CMD_LIST,
 			CMD_QUIT,
 		};
 };
