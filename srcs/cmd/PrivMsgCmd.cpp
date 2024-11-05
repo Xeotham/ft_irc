@@ -71,7 +71,7 @@ void	PrivMsgCmd::execute(int fd) {
 	for (std::vector<std::string>::iterator iter = dest.begin(); iter != dest.end(); iter++) {
 		if (iter->find_first_of('#') != std::string::npos)
 			this->sendMsgToChannel(*iter, msg);
-	    else if (*iter == "BotCmd")
+	    else if (*iter == "Bot")
 			this->sendMsgToBot(fd);
 		else if (Client::isClientInList(*_user_lst, *iter))
 			this->sendMsgToUser(*iter, msg);

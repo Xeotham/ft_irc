@@ -7,7 +7,7 @@
 # include <netdb.h>
 # include "ACommand.hpp"
 
-# define BOT Client("BotCmd", "BotCmd")
+# define BOT Client("Bot", "Bot")
 
 class BotCmd : public ACommand
 {
