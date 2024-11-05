@@ -34,9 +34,11 @@ void UserCmd::checkData(int fd) {
 	std::string					segment;
 
 	std::cout << _data << std::endl;
-	while (std::getline(storage, segment, ' ') && !segment.empty())
-		split.push_back(segment);
-	if (split.size() != 4 && (split.end() - 1)->at(0) != ':')
+	for (size_t i = 0; i < 4 && std::getline(storage, segment, ' '); i++) {
+		if (!segment.empty())
+			split.push_back(segment);
+	}
+	if (split.size() != 4 && split.at(3).at(0) != ':')
 		throw Error(fd, *_user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("USER"));
 }
 

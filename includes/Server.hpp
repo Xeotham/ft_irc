@@ -28,7 +28,7 @@ class Server
 		void			setUserCommand(int fd, std::string data);
 		bool			passCheck(int fd, std::string data);
 
-		static void		clearClients(int fd);
+		void		clearClients(std::vector<struct pollfd> &_fds, UserLst &_clients, int fd);
 
 		void			addChannel(const std::string &name);
 

@@ -8,7 +8,7 @@
 #include "KickCmd.hpp"
 #include "TopicCmd.hpp"
 #include "ModeCmd.hpp"
-#include "InviteCmd.hpp"
+#include <InviteCmd.hpp>
 #include <Bot.hpp>
 #include <PingCmd.hpp>
 #include <ListCmd.hpp>

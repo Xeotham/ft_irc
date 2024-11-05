@@ -38,10 +38,6 @@ void NickCmd::execute(int fd) {
 	try {
 		Client	&tmp = Client::getClientByNick(*_user_lst, _data);
 		static_cast<void> (tmp);
-		if (_user->getUser().empty()) {
-			close(fd);
-			// need to clear client from user_lst
-		}
 		throw Error(fd, *_user, ERR_NICKNAMEINUSE, NICKNAMEINUSE_MSG(_data));
 	}
 	catch (Error &e) {
