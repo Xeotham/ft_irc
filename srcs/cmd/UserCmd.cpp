@@ -38,7 +38,7 @@ void UserCmd::checkData(int fd) {
 		if (!segment.empty())
 			split.push_back(segment);
 	}
-	if (split.size() != 4 && split.at(3).at(0) != ':')
+	if (split.size() != 4 || split.at(3).at(0) != ':')
 		throw Error(fd, *_user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("USER"));
 }
 

@@ -1,5 +1,7 @@
 #include <Error.hpp>
+#include <string>
 
+class Client;
 Error::Error(int fd, const Client &sender, const std::string &type, const std::string &msg) : _sender(sender), _fd(fd), _type(type), _msg(msg) {}
 
 Error::Error(const Error &other) :_sender(other._sender), _fd(other._fd), _type(other._type), _msg(other._msg) {}

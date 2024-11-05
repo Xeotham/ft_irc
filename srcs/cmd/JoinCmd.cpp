@@ -104,7 +104,7 @@ void JoinCmd::execute(int fd) {
 		return ;
 	}
 	_channel_part = _data.substr(0, _data.find(' '));
-	_data = _data.substr(_data.find(' ') + 1);
+	_mdp_part = _data.substr(_data.find(' ') + 1);
 	std::map<std::string, std::string>	channels = this->splitData();
 	std::cout << _user->getNick() << " try to join" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {

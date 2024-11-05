@@ -39,7 +39,7 @@ ACommand *ACommand::cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst,
 	while (!cmds[i].empty() && data.find(cmds[i].c_str(), 0, cmds[i].size()) == std::string::npos)
 		i++;
 	new_data = data.substr(cmds[i].size());
-	if (!new_data.empty())
+	if (!new_data.empty() && new_data.at(0) == ' ')
 		new_data.erase(0, 1);
 	switch (i) {
 		case CMD_PRIVMSG:
