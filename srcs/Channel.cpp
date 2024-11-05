@@ -61,7 +61,9 @@ void Channel::setName(const std::string &name) {
 // Other member functions
 void Channel::addUser(Client &user) {
 	for (UserPtrLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
-		if ((*it)->getFd() == user.getFd())
+		std::cout << "test" << std::endl;
+		if ((*it)->getFd()\
+			== user.getFd())
 			throw (std::invalid_argument("The user is already in the " + this->getName() + " channel."));
 	}
 	this->_users.push_back(&user);

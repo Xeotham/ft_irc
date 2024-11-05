@@ -41,6 +41,8 @@ ACommand *ACommand::cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst,
 	new_data = data.substr(cmds[i].size());
 	if (!new_data.empty() && new_data.at(0) == ' ')
 		new_data.erase(0, 1);
+	if ((user.getUser().empty() || user.getNick().empty() || !user.getIsSet()) && (i != CMD_USER && i != CMD_NICK))
+		throw (true);
 	switch (i) {
 		case CMD_PRIVMSG:
 			return (new PrivMsgCmd(user, user_lst, chan_lst, new_data));

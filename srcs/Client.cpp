@@ -7,6 +7,7 @@ Client::Client()
 	this->_ipAdd = "";
 	this->_nick = "";
 	this->_user = "";
+	this->_is_set = false;
 	this->_password = false;
 }
 
@@ -16,6 +17,7 @@ Client::Client(const std::string &nick, const std::string &user)
 	this->_ipAdd = "";
 	this->_nick = nick;
 	this->_user = user;
+	this->_is_set = false;
 	this->_password = false;
 }
 
@@ -23,6 +25,7 @@ Client::Client(const Client &ref)
 {
 	this->_fd = ref._fd;
 	this->_password = ref._password;
+	this->_is_set = false;
 	*this = ref;
 }
 
@@ -36,6 +39,7 @@ Client	&Client::operator=(const Client &ref)
 	this->_user = ref._user;
 	this->_password = ref._password;
 	this->_channels = ref._channels;
+	this->_is_set = ref._is_set;
 	return (*this);
 }
 
@@ -79,6 +83,11 @@ void	Client::setPassword()
 void	Client::setBuffer(const std::string &buffer)
 {
 	this->_buffer = buffer;
+}
+
+void	Client::setIsSet()
+{
+	this->_is_set = true;
 }
 
 void	Client::addChannel(const Channel channel)
@@ -129,6 +138,11 @@ std::string	Client::getBuffer() const
 ChannelLst	&Client::getChannels()
 {
 	return (this->_channels);
+}
+
+bool	Client::getIsSet() const
+{
+	return this->_is_set;
 }
 
 Client	&Client::getClientByFd(UserLst &lst, int fd)

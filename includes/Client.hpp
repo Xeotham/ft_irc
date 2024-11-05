@@ -20,6 +20,7 @@ class Client
 		void	setUser(const std::string &user);
 		void	setRealname(const std::string &realname);
 		void	setPassword();
+		void	setIsSet();
 		void	setBuffer(const std::string &buffer);
 		void	addChannel(const Channel channel);
 		void	removeChannel(const Channel &channel);
@@ -31,6 +32,7 @@ class Client
 		std::string					getRealname() const;
 		std::string					getBuffer() const;
 		bool						getPassword() const;
+		bool						getIsSet() const;
 		ChannelLst					&getChannels();
 		static Client				&getClientByFd(UserLst &lst, int fd);
 		static Client				&getClientByNick(UserLst &lst, const std::string &nick);
@@ -46,6 +48,7 @@ class Client
 		std::string	_user;
 		std::string	_realname;
 		std::string	_buffer;
+		bool		_is_set;
 		bool		_password;
 		ChannelLst	_channels;
 };
