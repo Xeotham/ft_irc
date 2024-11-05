@@ -9,7 +9,7 @@
 #include "TopicCmd.hpp"
 #include "ModeCmd.hpp"
 #include <InviteCmd.hpp>
-#include <Bot.hpp>
+#include <BotCmd.hpp>
 #include <PingCmd.hpp>
 #include <ListCmd.hpp>
 #include <NamesCmd.hpp>
@@ -53,7 +53,7 @@ ACommand *ACommand::cmdSelector(int fd, UserLst &user_lst, ChannelLst &chan_lst,
 		case CMD_USER:
 			return (new UserCmd(user, user_lst, chan_lst, new_data));
 		case CMD_BOT:
-			return (new Bot(user, user_lst, chan_lst, new_data));
+			return (new BotCmd(user, user_lst, chan_lst, new_data));
 		case CMD_WHO:
 			return (new WhoCmd(user, user_lst, chan_lst, new_data));
 		case CMD_PING:

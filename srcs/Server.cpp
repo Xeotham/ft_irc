@@ -75,11 +75,28 @@ bool	Server::passCheck(int fd, std::string line)
 {
 	Client &user = Client::getClientByFd(_clients, fd);
 
-	if (line != _password && !_password.empty())
+	if (line.size() < 5)
 	{
 		std::string message = "Error : wrong password.\r\n";
 		send(fd, message.c_str(), message.size(), 0);
-		close(fd);
+		clearClients(_fds, _clients, fd);
+		return false;
+	}
+
+	std::string cmd = line.substr(0,4);
+	if (cmd != "PASS")
+	{
+		std::string message = "Error : wrong password.\r\n";
+		send(fd, message.c_str(), message.size(), 0);
+		clearClients(_fds, _clients, fd);
+		return false;
+	}
+
+	std::string passwd = line.substr(5);
+	if (passwd != _password && !_password.empty())
+	{
+		std::string message = "Error : wrong password.\r\n";
+		send(fd, message.c_str(), message.size(), 0);
 		clearClients(_fds, _clients, fd);
 		return false;
 	}
@@ -99,14 +116,13 @@ bool	Server::checkData(int fd, const std::string &data)
 			segment.erase(segment.find('\r'));
 		if (segment[0] == 0)
 			continue ;
-		if (segment.find("CAP LS 302") != std::string::npos)
+		if (segment == "CAP LS 302")
 			continue ;
 		if (!user.getPassword())
 		{
-			if (!passCheck(fd, segment.substr(5)))
+			if (!passCheck(fd, segment))
 				return (false);
-			else
-				continue ;
+			continue ;
 		}
 		try
 		{
@@ -148,7 +164,6 @@ std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
 			if (e.getType() == ERR_NICKNAMEINUSE)
 			{
 				e.sendError();
-				close(fd);
 				clearClients(_fds, _clients, fd);
 				return false;
 			}
@@ -166,19 +181,22 @@ void	Server::receiveNewData(int fd)
 
 	size_t data = recv(fd, tmp, sizeof(tmp) - 1, 0);
 
-	if (data > 0)
+	if (data <= 0)
 	{
-		for (size_t i = 0; i < _clients.size(); i++)
+		std::cout << "Client " << fd << " disconnected." << std::endl;
+		clearClients(_fds, _clients, fd);
+		return ;
+	}
+	for (size_t i = 0; i < _clients.size(); i++)
+	{
+		if (_clients[i].getFd() == fd)
 		{
-			if (_clients[i].getFd() == fd)
-			{
-				_clients[i].setBuffer(_clients[i].getBuffer() + tmp + '\0');
-				if (_clients[i].getBuffer().find("\r\n") == std::string::npos)
-					return ;
-				std::cout << "Client " << fd << " > data : " << _clients[i].getBuffer() << std::endl;
-				if (checkData(fd, _clients[i].getBuffer()))
-					_clients[i].setBuffer("");
-			}
+			_clients[i].setBuffer(_clients[i].getBuffer() + tmp);
+			if (_clients[i].getBuffer().find("\r\n") == std::string::npos)
+				return ;
+			std::cout << "Client " << fd << " > data : " << _clients[i].getBuffer() << std::endl;
+			if (checkData(fd, _clients[i].getBuffer()))
+				_clients[i].setBuffer("");
 		}
 	}
 }
@@ -203,6 +221,7 @@ void	Server::clearClients(std::vector<struct pollfd> &_fds, UserLst &_clients, i
 
 	cmd.execute(fd);
 	std::cout << "Client <" << fd << "> disconnected." << std::endl << std::endl;
+	close(fd);
 	for (size_t i =    0; i < _fds.size(); i++)
 	{
 		if (_fds[i].fd == fd)

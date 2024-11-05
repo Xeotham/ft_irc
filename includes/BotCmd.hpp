@@ -1,5 +1,5 @@
-#ifndef BOT_HPP
-# define BOT_HPP
+#ifndef BOTCMD_HPP
+# define BOTCMD_HPP
 
 # include "Params.hpp"
 # include "Client.hpp"
@@ -7,22 +7,22 @@
 # include <netdb.h>
 # include "ACommand.hpp"
 
-# define BOT Client("Bot", "Bot")
+# define BOT Client("BotCmd", "BotCmd")
 
-class Bot : public ACommand
+class BotCmd : public ACommand
 {
 private:
-	Bot();
-	Bot(const Bot& other);
-	Bot& operator=(const Bot& other);
+	BotCmd();
+	BotCmd(const BotCmd& other);
+	BotCmd& operator=(const BotCmd& other);
 
 	void		sendCommand(int fd, Client &user);
 	void		sendJoke(int fd, Client &user);
 	void		sendPong(int fd, Client &user);
 
 public:
-	Bot(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
-	~Bot();
+	BotCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data);
+	~BotCmd();
 	void    execute(int fd);
 };
 

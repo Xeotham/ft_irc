@@ -1,21 +1,21 @@
-#include <Bot.hpp>
+#include <BotCmd.hpp>
 
-Bot::Bot() {}
-Bot::Bot(const Bot& other) : ACommand(other) {(void)other;}
-Bot& Bot::operator=(const Bot& other) {(void)other;	return *this;}
-Bot::~Bot() {}
+BotCmd::BotCmd() {}
+BotCmd::BotCmd(const BotCmd& other) : ACommand(other) {(void)other;}
+BotCmd& BotCmd::operator=(const BotCmd& other) {(void)other;	return *this;}
+BotCmd::~BotCmd() {}
 
-Bot::Bot(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user, user_lst, chan_lst, data){}
+BotCmd::BotCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user, user_lst, chan_lst, data){}
 
 
-void    Bot::sendCommand(int fd, Client &user)
+void    BotCmd::sendCommand(int fd, Client &user)
 {
 	std::string message = ".\r\n";
 	(void)user;
 	send(fd, message.c_str(), message.size(), 0);
 }
 
-void    Bot::sendJoke(int fd, Client &user)
+void    BotCmd::sendJoke(int fd, Client &user)
 {
 	std::string joke[] = {" How do trees get on the Internet ?\r\n", " What is a computer’s first sign of old age ?\r\n",
 						  " What does a baby computer call his father ?\r\n", " What is an astronaut’s favorite control on the computer keyboard ?\r\n",
@@ -30,12 +30,12 @@ void    Bot::sendJoke(int fd, Client &user)
 	Messages::sendMsg(fd, user.getNick() + answer[i], BOT, MSG);
 }
 
-void    Bot::sendPong(int fd, Client &user)
+void    BotCmd::sendPong(int fd, Client &user)
 {
 	Messages::sendMsg(fd, user.getNick() + " pong", BOT, MSG);
 }
 
-void    Bot::execute(int fd)
+void    BotCmd::execute(int fd)
 {
 	Client &user = Client::getClientByFd(*_user_lst, fd);
 

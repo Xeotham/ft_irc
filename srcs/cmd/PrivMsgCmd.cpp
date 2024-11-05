@@ -1,6 +1,6 @@
 #include <PrivMsgCmd.hpp>
 #include <Channel.hpp>
-#include <Bot.hpp>
+#include <BotCmd.hpp>
 
 PrivMsgCmd::PrivMsgCmd() {}
 
@@ -54,7 +54,7 @@ void	PrivMsgCmd::sendMsgToUser(const std::string &dest, const std::string &msg)
 void    PrivMsgCmd::sendMsgToBot(int fd)
 {
 	std::string cmd = _data.substr(5);
-	Bot			bot(*_user, *_user_lst, *_chan_lst, cmd);
+	BotCmd			bot(*_user, *_user_lst, *_chan_lst, cmd);
 
     bot.execute(fd);
 }
@@ -71,7 +71,7 @@ void	PrivMsgCmd::execute(int fd) {
 	for (std::vector<std::string>::iterator iter = dest.begin(); iter != dest.end(); iter++) {
 		if (iter->find_first_of('#') != std::string::npos)
 			this->sendMsgToChannel(*iter, msg);
-	    else if (*iter == "Bot")
+	    else if (*iter == "BotCmd")
 			this->sendMsgToBot(fd);
 		else if (Client::isClientInList(*_user_lst, *iter))
 			this->sendMsgToUser(*iter, msg);

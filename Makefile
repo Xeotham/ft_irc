@@ -1,12 +1,12 @@
 NAME = ircserv
 
 SRCS = 	main.cpp \
-		Bot.cpp \
 		Error.cpp \
 		Client.cpp \
 		Server.cpp \
 		Channel.cpp \
 		Messages.cpp \
+		cmd/BotCmd.cpp \
 		cmd/WhoCmd.cpp \
 		cmd/NickCmd.cpp \
 		cmd/UserCmd.cpp \

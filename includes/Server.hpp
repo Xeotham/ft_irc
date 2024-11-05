@@ -3,7 +3,7 @@
 
 # include "Params.hpp"
 # include "Client.hpp"
-# include "Bot.hpp"
+# include "BotCmd.hpp"
 # include "Channel.hpp"
 # include "Colors.hpp"
 
@@ -24,8 +24,6 @@ class Server
 		void			receiveNewData(int fd);
 		bool			checkData(int fd, const std::string &data);
 
-		void			setNickCommand(int fd, std::string data);
-		void			setUserCommand(int fd, std::string data);
 		bool			passCheck(int fd, std::string data);
 
 		void		clearClients(std::vector<struct pollfd> &_fds, UserLst &_clients, int fd);
