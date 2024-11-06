@@ -7,14 +7,6 @@ BotCmd::~BotCmd() {}
 
 BotCmd::BotCmd(Client &user, UserLst &user_lst, ChannelLst &chan_lst, const std::string &data) : ACommand(user, user_lst, chan_lst, data){}
 
-
-void    BotCmd::sendCommand(int fd, Client &user)
-{
-	std::string message = ".\r\n";
-	(void)user;
-	send(fd, message.c_str(), message.size(), 0);
-}
-
 void    BotCmd::sendJoke(int fd, Client &user)
 {
 	std::string joke[] = {" How do trees get on the Internet ?\r\n", " What is a computer’s first sign of old age ?\r\n",
@@ -43,16 +35,14 @@ void    BotCmd::execute(int fd)
 		throw Error(fd, user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("BOT"));
 
 	int i = 0;
-	std::string cmd[] = {"cmd", "joke", "ping"};
+	std::string cmd[] = {"joke", "ping"};
 	std::cout << _data << std::endl;
-	while(i < 3 && cmd[i].compare(_data))
+	while(i < 2 && cmd[i].compare(_data))
 		i++;
 	switch (i) {
 		case 0:
-			return (sendCommand(fd, user));
-		case 1:
 			return (sendJoke(fd, user));
-		case 2:
+		case 1:
 			return (sendPong(fd, user));
 		default:
 			throw Error(fd, user, ERR_UNKNOWNCOMMAND, UNKNOWNCOMMAND_MSG("BOT " + _data));

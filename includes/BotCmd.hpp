@@ -16,7 +16,6 @@ private:
 	BotCmd(const BotCmd& other);
 	BotCmd& operator=(const BotCmd& other);
 
-	void		sendCommand(int fd, Client &user);
 	void		sendJoke(int fd, Client &user);
 	void		sendPong(int fd, Client &user);
 

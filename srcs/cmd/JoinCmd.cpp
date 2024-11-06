@@ -26,8 +26,10 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 		Channel &chan = Channel::getChannelByName(*_chan_lst, data.first);
 
 		std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
-		if (!chan.getPassword().empty() && chan.getPassword() != data.second)
+		if (!chan.getPassword().empty() && chan.getPassword() != data.second) {
+			std::cout << "ceci est un test" << std::endl;
 			throw (std::invalid_argument("Error : wrong password."));
+		}
 		if (chan.isModeSet('i') && !Channel::isInvitedUserInChannel(chan, *_user))
 			throw (std::invalid_argument("Error : not invited user."));
 		if (chan.isModeSet('l') && chan.getUserLimit() == chan.getUsers().size())
@@ -52,9 +54,8 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 			throw Error(_user->getFd(), *_user, ERR_INVITEONLYCHAN, ERR_INVITEONLYCHAN_MSG(data.first));
 		else if ((std::string(e.what()) == "Error : channel already full."))
 			throw Error(_user->getFd(), *_user, ERR_CHANNELISFULL, ERR_CHANNELISFULL_MSG(data.first));
-		else
-			std::cout << "UNHANDLE ERROR" << std::endl; // to delete // maxime	}
-
+		else if ((std::string(e.what()) == "The user is already in the channel."))
+			throw Error(_user->getFd(), *_user, ERR_ALREADYREGISTRED, ALREADYREGISTRED_MSG);
 	}
 }
 
@@ -93,7 +94,7 @@ void JoinCmd::execute(int fd) {
 	if (_data == "0") {
 		std::cout << "User " << _user->getNick() << " try to leave all channels" << std::endl;
 		std::string	part_param;
-		for (ChannelLst::iterator it = _chan_lst->begin(); it != _chan_lst->end(); it++) {
+		for (ChannelLst::iterator it = _user->getChannels().begin(); it != _user->getChannels().end(); it++) {
 			part_param += it->getName();
 			if (it + 1 != _chan_lst->end())
 				part_param += ",";
@@ -104,7 +105,10 @@ void JoinCmd::execute(int fd) {
 		return ;
 	}
 	_channel_part = _data.substr(0, _data.find(' '));
-	_mdp_part = _data.substr(_data.find(' ') + 1);
+	if (_data.find(' ') == std::string::npos)
+		_mdp_part = "";
+	else
+		_mdp_part = _data.substr(_data.find(' ') + 1);
 	std::map<std::string, std::string>	channels = this->splitData();
 	std::cout << _user->getNick() << " try to join" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {

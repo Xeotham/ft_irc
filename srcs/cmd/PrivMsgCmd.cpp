@@ -54,7 +54,7 @@ void	PrivMsgCmd::sendMsgToUser(const std::string &dest, const std::string &msg)
 
 void    PrivMsgCmd::sendMsgToBot(int fd)
 {
-	std::string cmd = _data.substr(5);
+	std::string cmd = _data.substr(_data.find(" :") + 2);
 	BotCmd			bot(*_user, *_user_lst, *_chan_lst, cmd);
 
     bot.execute(fd);
@@ -74,15 +74,21 @@ void	PrivMsgCmd::execute(int fd) {
 	if (_msg.empty())
 		throw Error(fd, *_user, ERR_NOTEXTTOSEND, NOTEXTTOSEND_MSG);
 	for (std::vector<std::string>::iterator iter = dest.begin(); iter != dest.end(); iter++) {
-		if (iter->find_first_of('#') != std::string::npos)
-			this->sendMsgToChannel(*iter, _msg);
-	    else if (*iter == "Bot")
-			this->sendMsgToBot(fd);
-		else if (Client::isClientInList(*_user_lst, *iter))
-			this->sendMsgToUser(*iter, _msg);
-	    else {
-	        Error(fd, *_user, ERR_NOSUCHNICK, NOSUCHNICK_MSG(*iter)).sendError();
-	    }
+		try {
+			if (iter->find_first_of('#') != std::string::npos)
+				this->sendMsgToChannel(*iter, _msg);
+		    else if (*iter == "Bot")
+				this->sendMsgToBot(fd);
+			else if (Client::isClientInList(*_user_lst, *iter))
+				this->sendMsgToUser(*iter, _msg);
+		    else {
+		        Error(fd, *_user, ERR_NOSUCHNICK, NOSUCHNICK_MSG(*iter)).sendError();
+		    }
+		}
+		catch (Error &err) {
+			err.sendError();
+		}
+
 	}
 }
 
