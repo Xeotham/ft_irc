@@ -16,7 +16,6 @@ UserCmd	&UserCmd::operator=(const UserCmd &other)
 }
 
 void UserCmd::execute(int fd) {
-	//	USER <username> <hostname> <servername> :<realname>
 	this->checkData(fd);
 
 	std::string	username = _data.substr(0, _data.find(' '));
@@ -25,7 +24,7 @@ void UserCmd::execute(int fd) {
 	this->checkData(fd, username);
 	_user->setUser(username);
 	_user->setRealname(realname);
-	std::cout << "Client <" << fd << "> set username to : " << _user->getUser() << std::endl;
+	// std::cout << "Client <" << fd << "> set username to : " << _user->getUser() << std::endl;
 }
 
 void UserCmd::checkData(int fd) {

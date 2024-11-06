@@ -134,7 +134,7 @@ void	ModeCmd::oMode(Channel *target_channel, const bool enable, std::string arg,
 		target_channel->setMode('o', enable); 
 		Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " -o " + target_client->getNick(), sender, "MODE");		
 		return;}
-	target_channel->addOperator(*target_client); // Should I catch the throw or it's useless?
+	target_channel->addOperator(*target_client);
 	target_channel->setMode('o', enable);
 	Messages::sendGlobalMsg(target_channel->getUsers(), target_channel->getName() + " +o " + target_client->getNick(), sender, "MODE");
 }

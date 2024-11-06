@@ -131,29 +131,6 @@ bool	Server::checkData(int fd, const std::string &data)
 			cmd = ACommand::cmdSelector(fd, this->_clients, this->_channels, segment);
 			cmd->execute(fd);
 			delete cmd;
-
-
-// std::cout << RED "SERVER DATA:" CLR<< std::endl;
-// std::cout << "Current clients:" << std::endl;
-// for (UserLst::iterator it = _clients.begin(); it != _clients.end(); ++it) {
-// 	std::cout << "Client FD: " << it->getFd() << ", IP: " << it->getIpAdd() << std::endl;
-// }
-
-// std::cout << "Current channels:" << std::endl;
-// for (ChannelLst::iterator itt = _channels.begin(); itt != _channels.end(); ++itt) 
-// {
-// 	std::cout << GRN "Channel Name: " << itt->getName()<< CLR << std::endl;
-// 	UserPtrLst &users = itt->getUsers();
-// 	for (UserPtrLst::iterator aa = users.begin(); aa != users.end(); ++aa) {
-// 		std::cout << "	Client FD: " << (*aa)->getFd() << ", IP: " << (*aa)->getIpAdd() << std::endl;
-// 	}
-// 	UserLst &operators = itt->getOperators();
-// 	for (UserLst::iterator ittt = operators.begin(); ittt != operators.end(); ++ittt) {
-// 		std::cout << "	Operator FD: " << ittt->getFd() << ", IP: " << ittt->getIpAdd() << std::endl;
-// 	}
-// }
-// std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;
-
 		}
 		catch (bool b) {
 			if (!b)
@@ -288,7 +265,29 @@ void	Server::serverInit()
 					receiveNewData(_fds[i].fd);
 			}
 		}
+			std::cout << std::endl << RED "SERVER DATA:" CLR<< std::endl;
+			std::cout << "Current clients:" << std::endl;
+			for (UserLst::iterator it = _clients.begin(); it != _clients.end(); ++it) {
+				std::cout << "Client FD: " << it->getFd() << ", IP: " << it->getIpAdd() << std::endl;
+			}
+
+			std::cout << "Current channels:" << std::endl;
+			for (ChannelLst::iterator itt = _channels.begin(); itt != _channels.end(); ++itt) 
+			{
+				std::cout << GRN "Channel Name: " << itt->getName()<< CLR << std::endl;
+				UserLst &users = itt->getUsers();
+				for (UserLst::iterator aa = users.begin(); aa != users.end(); ++aa) {
+					std::cout << "	Client FD: " << aa->getFd() << ", IP: " << aa->getIpAdd() << std::endl;
+				}
+				UserLst &operators = itt->getOperators();
+				for (UserLst::iterator ittt = operators.begin(); ittt != operators.end(); ++ittt) {
+					std::cout << "	Operator FD: " << ittt->getFd() << ", IP: " << ittt->getIpAdd() << std::endl;
+				}
+			}
+			std::cout << std::endl<< std::endl;
+			// std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;			
 	}
+
 	closeFds();
 }
 

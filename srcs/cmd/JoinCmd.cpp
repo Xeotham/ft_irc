@@ -25,9 +25,8 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 	try {
 		Channel &chan = Channel::getChannelByName(*_chan_lst, data.first);
 
-		std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
+		// std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
 		if (!chan.getPassword().empty() && chan.getPassword() != data.second) {
-			std::cout << "ceci est un test" << std::endl;
 			throw (std::invalid_argument("Error : wrong password."));
 		}
 		if (chan.isModeSet('i') && !Channel::isInvitedUserInChannel(chan, *_user))
