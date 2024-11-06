@@ -126,10 +126,9 @@ void	ModeCmd::kMode(Channel *target_channel, const bool enable, const std::strin
 void	ModeCmd::oMode(Channel *target_channel, const bool enable, std::string arg, int fd, Client &sender){	
 	
 	Client* target_client = Client::getClientByNickPt(target_channel->getUsers(), arg);
-	if (!target_channel){
+	if (!target_client){
 		Messages::sendServMsg(fd, arg + " :No such nick/channel", "401 " + sender.getNick()); 
 		return;}
-
 	if (!enable){
 		target_channel->removeOperator(*target_client); 
 		target_channel->setMode('o', enable); 
