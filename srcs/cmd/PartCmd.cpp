@@ -18,8 +18,8 @@ PartCmd &PartCmd::operator=(const PartCmd &other) {
 void	PartCmd::exitChannel(Channel &chan, const std::string &msg) {
 
 	if (Channel::isUserInChannel(chan, *_user)) {
-		for (UserPtrLst::iterator iter = chan.getUsers().begin(); iter != chan.getUsers().end(); iter++) {
-			Messages::sendMsg((*iter)->getFd(), chan.getName() + " " + msg, *_user, PART);
+		for (UserLst::iterator iter = chan.getUsers().begin(); iter != chan.getUsers().end(); iter++) {
+			Messages::sendMsg(iter->getFd(), chan.getName() + " " + msg, *_user, PART);
 		}
 		chan.removeUser(*_user);
 		if (Channel::isOperatorInChannel(chan, *_user))

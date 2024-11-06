@@ -21,8 +21,8 @@ void	NickCmd::sendToEveryone() {
 	receiver.insert(_user->getFd());
 	for (ChannelLst::iterator it_chan = _user->getChannels().begin(); it_chan != _user->getChannels().end(); ++it_chan) {
 		Channel	&chan = Channel::getChannelByName(*_chan_lst, it_chan->getName());
-		for (UserPtrLst::iterator it_user = chan.getUsers().begin(); it_user != chan.getUsers().end(); ++it_user)
-			receiver.insert((*it_user)->getFd());
+		for (UserLst::iterator it_user = chan.getUsers().begin(); it_user != chan.getUsers().end(); ++it_user)
+			receiver.insert(it_user->getFd());
 	}
 	for (std::set<int>::iterator it = receiver.begin(); it != receiver.end(); ++it) {
 		std::cout << "Sending NICK to <" << *it << ">" << std::endl;

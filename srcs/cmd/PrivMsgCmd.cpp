@@ -24,10 +24,11 @@ void	PrivMsgCmd::sendMsgToChannel(const std::string &channel, const std::string 
 	try {
 		Channel	&chan = Channel::getChannelByName(*_chan_lst, channel);
 		if (Channel::isUserInChannel(chan, *_user)) {
-			for (UserPtrLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-				if ((*it)->getFd() != _user->getFd()) {
-					std::cout << "Client <" << _user->getFd() << "> send message to <" << (*it)->getNick() << "> : " << _data << std::endl;
-					Messages::sendMsg((*it)->getFd(), channel + " :" + msg, *_user, MSG);
+			for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+				if (it->getFd() != _user->getFd()) {
+					Client	&receiver = Client::getClientByFd(*_user_lst, it->getFd());
+					std::cout << "Client <" << _user->getFd() << "> send message to <" << receiver.getNick() << "> : " << _data << std::endl;
+					Messages::sendMsg(receiver.getFd(), channel + " :" + msg, *_user, MSG);
 				}
 			}
 		}
@@ -63,18 +64,22 @@ void	PrivMsgCmd::execute(int fd) {
 	if (_data.empty())
 		throw Error(fd, *_user, ERR_NORECIPIENT, NORECIPIENT_MSG("PRIVMSG"));
 
-	std::string					msg = _data.substr(_data.find(' ' ) + 2);
-	std::vector<std::string>	dest = splitData(_data.substr(0, _data.find(' ')));
+	_msg = _data.substr(_data.find(' ') + 1);
+	_dest = _data.substr(0, _data.find(' '));
+	if (_msg.at(0) != ':')
+		throw Error(fd, *_user, ERR_NOTEXTTOSEND, NOTEXTTOSEND_MSG);
+	_msg = _msg.substr(1);
+	std::vector<std::string>	dest = splitData(_dest);
 
-	if (msg.empty())
+	if (_msg.empty())
 		throw Error(fd, *_user, ERR_NOTEXTTOSEND, NOTEXTTOSEND_MSG);
 	for (std::vector<std::string>::iterator iter = dest.begin(); iter != dest.end(); iter++) {
 		if (iter->find_first_of('#') != std::string::npos)
-			this->sendMsgToChannel(*iter, msg);
+			this->sendMsgToChannel(*iter, _msg);
 	    else if (*iter == "Bot")
 			this->sendMsgToBot(fd);
 		else if (Client::isClientInList(*_user_lst, *iter))
-			this->sendMsgToUser(*iter, msg);
+			this->sendMsgToUser(*iter, _msg);
 	    else {
 	        Error(fd, *_user, ERR_NOSUCHNICK, NOSUCHNICK_MSG(*iter)).sendError();
 	    }

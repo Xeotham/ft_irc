@@ -175,15 +175,6 @@ Client	*Client::getClientByNickPt(UserLst &lst, const std::string &nick)
 	return (NULL);
 }
 
-Client	*Client::getClientByNickPt(UserPtrLst &lst, const std::string &nick)
-{
-	for (UserPtrLst::iterator it = lst.begin(); it != lst.end(); it++) {
-		if ((*it)->getNick() == nick) {
-			return (*it);
-		}
-	}
-	return (NULL);
-}
 
 Client	&Client::getClientByUser(UserLst &lst, const std::string &user)
 {
@@ -199,15 +190,6 @@ bool	Client::isClientInList(UserLst &lst, const std::string &nick)
 {
 	for (UserLst::iterator it = lst.begin(); it != lst.end(); it++) {
 		if (it->getNick() == nick)
-			return (true);
-	}
-	return (false);
-}
-
-bool	Client::isClientInList(UserPtrLst &lst, const std::string &nick)
-{
-	for (UserPtrLst::iterator it = lst.begin(); it != lst.end(); it++) {
-		if ((*it)->getNick() == nick)
 			return (true);
 	}
 	return (false);

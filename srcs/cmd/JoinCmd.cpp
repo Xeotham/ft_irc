@@ -36,8 +36,8 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 			chan.removeInvitedUser(*_user);
 		chan.addUser(*_user);
 		_user->addChannel(chan);
-		for (UserPtrLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-			Messages::sendMsg((*it)->getFd(), chan.getName(), *_user, JOIN);
+		for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+			Messages::sendMsg(it->getFd(), chan.getName(), *_user, JOIN);
 		}
 		if (!chan.getTopic().empty())
 			Messages::sendServMsg(_user->getFd(), _user->getNick() + " " + chan.getName() + " " + chan.getTopic(), "332");

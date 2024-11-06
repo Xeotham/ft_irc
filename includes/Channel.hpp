@@ -26,7 +26,7 @@ class Channel {
 		void					removeUser(const Client& user);
 		void					removeOperator(const Client& user);
 		void					removeInvitedUser(const Client& user);
-		UserPtrLst				&getUsers();
+		UserLst					&getUsers();
 		UserLst					&getOperators();
 		const std::string		&getName() const;
 		const std::string		&getPassword() const;
@@ -51,7 +51,7 @@ class Channel {
 		std::set<char>	_modes;
 		UserLst			_invited_users;
 		UserLst			_operators;
-		UserPtrLst		_users;
+		UserLst			_users;
 		unsigned int	_user_limit;
 };
 

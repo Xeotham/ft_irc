@@ -37,10 +37,8 @@ class Client
 		static Client				&getClientByFd(UserLst &lst, int fd);
 		static Client				&getClientByNick(UserLst &lst, const std::string &nick);
 		static Client				*getClientByNickPt(UserLst &lst, const std::string &nick);
-		static Client				*getClientByNickPt(UserPtrLst &lst, const std::string &nick);
 		static Client				&getClientByUser(UserLst &lst, const std::string &user);
 		static bool					isClientInList(UserLst &lst, const std::string &nick);
-		static bool					isClientInList(UserPtrLst &lst, const std::string &nick);
 	private:
 		int			_fd;
 		std::string	_ipAdd;

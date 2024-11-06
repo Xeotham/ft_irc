@@ -9,7 +9,6 @@ class Client;
 # include <vector>
 
 typedef std::vector<Client> UserLst;
-typedef std::vector<Client*> UserPtrLst;
 typedef std::vector<Channel> ChannelLst;
 
 # include <iostream>

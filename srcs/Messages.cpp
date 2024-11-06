@@ -37,9 +37,3 @@ void	Messages::sendGlobalMsg(UserLst& users, const std::string &msg, const Clien
 	for (UserLst::iterator it = users.begin(); it != users.end(); ++it)
 		sendMsg(it->getFd(), msg, sender, type);
 }
-
-void	Messages::sendGlobalMsg(UserPtrLst& users, const std::string &msg, const Client &sender, const std::string &type)
-{
-	for (UserPtrLst::iterator it = users.begin(); it != users.end(); ++it)
-		sendMsg((*it)->getFd(), msg, sender, type);
-}

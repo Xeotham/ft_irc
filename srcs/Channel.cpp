@@ -60,13 +60,13 @@ void Channel::setName(const std::string &name) {
 
 // Other member functions
 void Channel::addUser(Client &user) {
-	for (UserPtrLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
+	for (UserLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
 		std::cout << "test" << std::endl;
-		if ((*it)->getFd()\
+		if (it->getFd()\
 			== user.getFd())
 			throw (std::invalid_argument("The user is already in the " + this->getName() + " channel."));
 	}
-	this->_users.push_back(&user);
+	this->_users.push_back(user);
 }
 
 void	Channel::addOperator(Client &user){
@@ -78,8 +78,8 @@ void	Channel::addOperator(Client &user){
 }
 
 void Channel::removeUser(const Client &user) {
-	for (UserPtrLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
-		if ((*it)->getFd() == user.getFd()) {
+	for (UserLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
+		if (it->getFd() == user.getFd()) {
 			this->_users.erase(it);
 			return ;
 		}
@@ -101,7 +101,7 @@ UserLst&	Channel::getOperators(){
 	return (this->_operators);
 }
 
-UserPtrLst &Channel::getUsers() {
+UserLst &Channel::getUsers() {
 	return (this->_users);
 }
 
@@ -128,8 +128,8 @@ Channel *Channel::getChannelByNamePt(ChannelLst &lst, const std::string &name) {
 }
 
 bool	Channel::isUserInChannel(Channel &channel, const Client &user) {
-	for (UserPtrLst::const_iterator it = channel.getUsers().begin(); it != channel.getUsers().end(); it++) {
-		if ((*it) == &user)
+	for (UserLst::const_iterator it = channel.getUsers().begin(); it != channel.getUsers().end(); it++) {
+		if (it->getFd() == user.getFd())
 			return (true);
 	}
 	return (false);

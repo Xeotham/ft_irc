@@ -16,10 +16,11 @@ WhoCmd	&WhoCmd::operator=(const WhoCmd &other)
 }
 
 void	WhoCmd::sendData(int fd, Channel &chan) {
-	for (UserPtrLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
-		if (!(*it)->getIsSet())
+	for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
+		if (!it->getIsSet())
 			continue;
-		std::string	data = _user->getNick() + " " + chan.getName() + " " + (*it)->getUser() + " localhost " + SERVER_NAME + " " + (*it)->getNick() + " :0 " + (*it)->getRealname();
+		Client	&user = Client::getClientByFd(*_user_lst, it->getFd());
+		std::string	data = _user->getNick() + " " + chan.getName() + " " + user.getUser() + " localhost " + SERVER_NAME + " " + user.getNick() + " :0 " + user.getRealname();
 		Messages::sendServMsg(fd, data, WHOREPLY);
 	}
 }
