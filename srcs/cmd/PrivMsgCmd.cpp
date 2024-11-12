@@ -27,7 +27,6 @@ void	PrivMsgCmd::sendMsgToChannel(const std::string &channel, const std::string 
 			for (UserLst::iterator it = chan.getUsers().begin(); it != chan.getUsers().end(); it++) {
 				if (it->getFd() != _user->getFd()) {
 					Client	&receiver = Client::getClientByFd(*_user_lst, it->getFd());
-					std::cout << "Client <" << _user->getFd() << "> send message to <" << receiver.getNick() << "> : " << _data << std::endl;
 					Messages::sendMsg(receiver.getFd(), channel + " :" + msg, *_user, MSG);
 				}
 			}
@@ -97,7 +96,6 @@ std::vector<std::string> PrivMsgCmd::splitData(const std::string &data) {
 	std::stringstream			storage(data);
 	std::string					segment;
 
-	std::cout << data << std::endl;
 	while (std::getline(storage, segment, ',') && !segment.empty())
 		dest.push_back(segment);
 	for (std::vector<std::string>::iterator it = dest.begin(); it != dest.end(); it++) {

@@ -44,6 +44,9 @@ void PartCmd::execute(int fd) {
         	Channel &chan = Channel::getChannelByName(*_chan_lst, *iter);
 			this->exitChannel(chan, msg);
 		}
+		catch (std::exception &exception) {
+			Error(fd, *_user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(*iter)).sendError();
+		}
 		catch (Error &e) {
 			e.sendError();
         }

@@ -26,7 +26,6 @@ Channel::Channel(const std::string &name, const std::string &pwd) {
 	this->_password = pwd;
 	this->_topic = "";
 	this->_user_limit = 0;
-	// std::cout << "Password: " << pwd << std::endl;
 }
 
 Channel::Channel(const Channel &other) {
@@ -58,7 +57,6 @@ void Channel::setName(const std::string &name) {
 	this->_name = name;
 }
 
-// Other member functions
 void Channel::addUser(Client &user) {
 	for (UserLst::iterator it = this->_users.begin(); it != this->_users.end(); it++) {
 		if (it->getFd() == user.getFd())

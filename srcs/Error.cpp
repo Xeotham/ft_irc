@@ -21,4 +21,5 @@ const std::string &Error::getType() const {
 
 void Error::sendError() const {
 	Messages::sendServMsg(this->_fd, this->_sender.getNick() + " " + this->_msg, this->_type);
+	std::cerr << ":" << SERVER_NAME << " " << this->_type << " " << this->_msg << std::endl;
 }

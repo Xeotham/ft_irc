@@ -24,7 +24,6 @@ void UserCmd::execute(int fd) {
 	this->checkData(fd, username);
 	_user->setUser(username);
 	_user->setRealname(realname);
-	// std::cout << "Client <" << fd << "> set username to : " << _user->getUser() << std::endl;
 }
 
 void UserCmd::checkData(int fd) {
@@ -32,7 +31,6 @@ void UserCmd::checkData(int fd) {
 	std::stringstream			storage(_data);
 	std::string					segment;
 
-	std::cout << _data << std::endl;
 	for (size_t i = 0; i < 4 && std::getline(storage, segment, ' '); i++) {
 		if (!segment.empty())
 			split.push_back(segment);

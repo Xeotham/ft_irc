@@ -52,9 +52,6 @@ void	ModeCmd::execute(int fd)
 
 	getNextWord(last_param, arg);
 
-	std::cout << "THE MODE LINE IS: " << mode << std::endl;
-
-
 	for (std::string::size_type i = 0; i != mode.size(); ++i){
 		char	c = mode[i];
 		

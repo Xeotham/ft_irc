@@ -25,7 +25,6 @@ void	NickCmd::sendToEveryone() {
 			receiver.insert(it_user->getFd());
 	}
 	for (std::set<int>::iterator it = receiver.begin(); it != receiver.end(); ++it) {
-		std::cout << "Sending NICK to <" << *it << ">" << std::endl;
 		Messages::sendMsg(*it, _data, *_user, NICK);
 	}
 }
@@ -46,6 +45,5 @@ void NickCmd::execute(int fd) {
 	catch (...) {
 		this->sendToEveryone();
 		_user->setNick(_data);
-		std::cout << "Client <" << fd << "> set nickname to : " << _user->getNick() << std::endl;
 	}
 }

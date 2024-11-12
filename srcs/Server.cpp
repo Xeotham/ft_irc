@@ -42,7 +42,6 @@ Server::~Server()
 void	Server::signalHandler(int signum)
 {
 	(void)signum;
-	std::cout << "Signal received." << std::endl;
 	Server::_signal = true;
 }
 
@@ -162,7 +161,6 @@ void	Server::receiveNewData(int fd)
 
 	if (data <= 0)
 	{
-		std::cout << "Client " << fd << " disconnected." << std::endl;
 		clearClients(_fds, _clients, fd);
 		return ;
 	}
@@ -173,7 +171,6 @@ void	Server::receiveNewData(int fd)
 			_clients[i].setBuffer(_clients[i].getBuffer() + tmp);
 			if (_clients[i].getBuffer().find("\r\n") == std::string::npos)
 				return ;
-			std::cout << "Client " << fd << " > data : " << _clients[i].getBuffer() << std::endl;
 			if (checkData(fd, _clients[i].getBuffer()))
 				_clients[i].setBuffer("");
 		}
@@ -285,7 +282,6 @@ void	Server::serverInit()
 				}
 			}
 			std::cout << std::endl<< std::endl;
-			// std::cout << RED "END SERVER DATAS" CLR<< std::endl<< std::endl;			
 	}
 
 	closeFds();

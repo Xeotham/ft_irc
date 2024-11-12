@@ -25,7 +25,6 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 	try {
 		Channel &chan = Channel::getChannelByName(*_chan_lst, data.first);
 
-		// std::cout << "When joining Channel " << chan.getName() << " & " << chan.getPassword() << std::endl;
 		if (!chan.getPassword().empty() && chan.getPassword() != data.second) {
 			throw (std::invalid_argument("Error : wrong password."));
 		}
@@ -44,7 +43,6 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 			Messages::sendServMsg(_user->getFd(), _user->getNick() + " " + chan.getName() + " " + chan.getTopic(), "332");
 	}
 	catch (std::exception &e) {
-		std::cout << "Error : " << e.what() << std::endl;
 		if (std::string(e.what()) == "Channel not found.")
 			throw Error(_user->getFd(), *_user, ERR_NOSUCHCHANNEL, NOSUCHCHANNEL_MSG(data.first));
 		else if (std::string(e.what()) == "Error : wrong password.")
@@ -59,9 +57,7 @@ void	JoinCmd::joinChannel(const std::pair<std::string, std::string> &data) {
 }
 
 void	JoinCmd::createJoinChannel(const std::pair<std::string, std::string> &data) {
-	std::cout << "When creating Channel " << data.first << " & " << data.second << std::endl;
 	Channel chan(data.first, data.second);
-	std::cout << "When channel created " << chan.getName() << " & " << chan.getPassword() << std::endl;
 	chan.addUser(*_user);
 	chan.addOperator(*_user);
 	_user->addChannel(chan);
@@ -91,14 +87,13 @@ void JoinCmd::execute(int fd) {
 	if (_data.empty())
 		throw Error(fd, *_user, ERR_NEEDMOREPARAMS, NEEDMOREPARAMS_MSG("JOIN"));
 	if (_data == "0") {
-		std::cout << "User " << _user->getNick() << " try to leave all channels" << std::endl;
 		std::string	part_param;
 		for (ChannelLst::iterator it = _user->getChannels().begin(); it != _user->getChannels().end(); it++) {
 			part_param += it->getName();
 			if (it + 1 != _chan_lst->end())
 				part_param += ",";
 		}
-		part_param += " :Leaving\r\n";
+		part_param += " :Leaving";
 		PartCmd part(*_user, *_user_lst, *_chan_lst, part_param);
 		part.execute(fd);
 		return ;
@@ -109,7 +104,6 @@ void JoinCmd::execute(int fd) {
 	else
 		_mdp_part = _data.substr(_data.find(' ') + 1);
 	std::map<std::string, std::string>	channels = this->splitData();
-	std::cout << _user->getNick() << " try to join" << std::endl;
 	for (std::map<std::string, std::string>::iterator it = channels.begin(); it != channels.end(); it++) {
 		try {
 			this->joinOneChannel(*it);

@@ -36,7 +36,6 @@ void    BotCmd::execute(int fd)
 
 	int i = 0;
 	std::string cmd[] = {"joke", "ping"};
-	std::cout << _data << std::endl;
 	while(i < 2 && cmd[i].compare(_data))
 		i++;
 	switch (i) {

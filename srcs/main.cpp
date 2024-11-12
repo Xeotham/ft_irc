@@ -17,6 +17,7 @@ int	main(int argc, char **argv)
 	Server serv(std::atoi(argv[1]), argv[2]);
 	try
 	{
+		signal(SIGPIPE, SIG_IGN);
 		signal(SIGINT, Server::signalHandler);
 		signal(SIGQUIT, Server::signalHandler);
 		serv.serverInit();
